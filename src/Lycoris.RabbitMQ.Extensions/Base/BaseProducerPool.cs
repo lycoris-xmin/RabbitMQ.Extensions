@@ -1,5 +1,6 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Impl;
 using Lycoris.RabbitMQ.Extensions.Options;
+using System;
 using System.Collections.Concurrent;
 
 namespace Lycoris.RabbitMQ.Extensions.Base
@@ -43,7 +44,7 @@ namespace Lycoris.RabbitMQ.Extensions.Base
                 throw new ObjectDisposedException(nameof(RabbitClientProducer));
             }
 
-            RabbitProducer? rabbitProducer;
+            RabbitProducer rabbitProducer;
             lock (rabbitProducers)
             {
                 if (!rabbitProducers.TryDequeue(out rabbitProducer) || rabbitProducer == null || !rabbitProducer.IsOpen)
@@ -79,7 +80,7 @@ namespace Lycoris.RabbitMQ.Extensions.Base
                 Disposed = true;
                 while (!rabbitProducers.IsEmpty)
                 {
-                    rabbitProducers.TryDequeue(out RabbitProducer? rabbitProducer);
+                    rabbitProducers.TryDequeue(out RabbitProducer rabbitProducer);
                     rabbitProducer?.Dispose();
                 }
             }

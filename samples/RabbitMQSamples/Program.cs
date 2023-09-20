@@ -14,7 +14,7 @@ builder.Services.AddRabbitMQExtensions(builder =>
         // ip地址
         opt.Hosts = new string[] { "yout rabbitmq service ip" };
         // 端口号 不设置默认：5672
-        opt.Port = 5667;
+        opt.Port = 5672;
         // 账号
         opt.UserName = "your user name";
         // 密码
@@ -122,8 +122,6 @@ builder.Services.AddRabbitMQExtensions(builder =>
         };
     })
     .AddListener<TestConsumer3>("exchange.your.delayexchangename", "queue.your.queuename3");
-
-    builder.UseLycorisLogger();
 });
 
 // 注册生产者

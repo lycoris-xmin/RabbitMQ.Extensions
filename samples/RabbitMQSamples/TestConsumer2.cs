@@ -1,5 +1,5 @@
-﻿using Lycoris.RabbitMQ.Extensions.DataModel;
-using Lycoris.RabbitMQ.Extensions.Impl;
+﻿using Lycoris.RabbitMQ.Extensions;
+using Lycoris.RabbitMQ.Extensions.DataModel;
 
 namespace RabbitMQSample
 {

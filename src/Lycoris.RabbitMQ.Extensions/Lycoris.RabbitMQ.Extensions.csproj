@@ -1,17 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Authors>Lycoris</Authors>
-    <PackageReadmeFile>Readme.md</PackageReadmeFile>
-    <Description>RabbitMQ的简易扩展，方便不熟悉rabbitmq的开发者简单的使用，自述文件有使用说明</Description>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageIcon>lycoris-nuget-logo.png</PackageIcon>
-    <VersionPrefix>6.0.4</VersionPrefix>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/lycoris-xmin/RabbitMQ.Extensions</RepositoryUrl>
+    <Authors>lycoris</Authors>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <RepositoryUrl>https://github.com/lycoris-xmin/Lycoris.RabbitMQ.Extensions.git</RepositoryUrl>
+    <Version>6.0.5</Version>
+    <Description>RabbitMQ使用扩展，简化了生产者与消费者的使用，支持延迟队列</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,16 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lycoris.Base" Version="6.1.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Readme.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
   </ItemGroup>
 
 </Project>

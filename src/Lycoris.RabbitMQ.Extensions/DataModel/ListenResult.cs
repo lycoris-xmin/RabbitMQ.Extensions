@@ -1,4 +1,6 @@
-﻿namespace Lycoris.RabbitMQ.Extensions.DataModel
+﻿using System.Threading;
+
+namespace Lycoris.RabbitMQ.Extensions.DataModel
 {
     /// <summary>
     /// 

@@ -1,13 +1,15 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Options;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder
 {
     internal static class RabbitMQOptionsStore
     {
         private const string DelayPropsKey = "x-delay";
-        private static readonly ConcurrentDictionary<string, RabbitOptions> _RabbitOptions = new();
-        private static readonly ConcurrentDictionary<string, RabbitProducerOptions> _RabbitProducerOptions = new();
+        private static readonly ConcurrentDictionary<string, RabbitOptions> _RabbitOptions = new ConcurrentDictionary<string, RabbitOptions>();
+        private static readonly ConcurrentDictionary<string, RabbitProducerOptions> _RabbitProducerOptions = new ConcurrentDictionary<string, RabbitProducerOptions>();
 
         /// <summary>
         /// 
@@ -22,7 +24,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitOptions? GetRabbitMQOption(string configureName)
+        public static RabbitOptions GetRabbitMQOption(string configureName)
             => _RabbitOptions.ContainsKey(configureName) ? _RabbitOptions[configureName] : null;
 
         /// <summary>
@@ -32,14 +34,17 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// <param name="options"></param>
         public static void AddOrUpdateRabbitProducerOptions(string configureName, RabbitProducerOptions options)
         {
-            options.Arguments ??= new Dictionary<string, object>();
+            if (options.Arguments == null)
+                options.Arguments = new Dictionary<string, object>();
 
             if (options.Type == RabbitExchangeType.Delayed)
             {
                 if (options.DelayTime <= 0)
                     throw new ArgumentOutOfRangeException(nameof(options.DelayTime));
 
-                options.BasicProps ??= new Dictionary<string, object>();
+                if (options.BasicProps == null)
+                    options.BasicProps = new Dictionary<string, object>();
+
                 if (options.BasicProps.ContainsKey(DelayPropsKey))
                     options.BasicProps[DelayPropsKey] = options.DelayTime * 1000;
                 else
@@ -71,7 +76,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitProducerOptions? GetRabbitProducerOptions(string configureName)
+        public static RabbitProducerOptions GetRabbitProducerOptions(string configureName)
             => _RabbitProducerOptions.ContainsKey(configureName) ? _RabbitProducerOptions[configureName] : null;
     }
 }

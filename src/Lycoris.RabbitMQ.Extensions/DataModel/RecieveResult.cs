@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client.Events;
+using System;
 using System.Text;
+using System.Threading;
 
 namespace Lycoris.RabbitMQ.Extensions.DataModel
 {
@@ -8,7 +10,7 @@ namespace Lycoris.RabbitMQ.Extensions.DataModel
     /// </summary>
     public class RecieveResult : IDisposable
     {
-        CancellationTokenSource? cancellationTokenSource;
+        CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
         /// 

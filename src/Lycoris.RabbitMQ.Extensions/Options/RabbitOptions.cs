@@ -1,4 +1,7 @@
-﻿namespace Lycoris.RabbitMQ.Extensions.Options
+﻿using System;
+using System.Collections.Generic;
+
+namespace Lycoris.RabbitMQ.Extensions.Options
 {
     /// <summary>
     /// 
@@ -18,12 +21,12 @@
         /// <summary>
         /// 参数,例如：{ "x-queue-type", "classic" }
         /// </summary>
-        public Dictionary<string, object>? Arguments { get; set; }
+        public Dictionary<string, object> Arguments { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public Dictionary<string, object>? BasicProps { get; set; }
+        public Dictionary<string, object> BasicProps { get; set; }
 
         /// <summary>
         /// 

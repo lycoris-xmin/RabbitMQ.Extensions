@@ -1,6 +1,9 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lycoris.RabbitMQ.Extensions.Base
 {
@@ -10,7 +13,7 @@ namespace Lycoris.RabbitMQ.Extensions.Base
     public class BaseRabbit : IDisposable
     {
         readonly string[] hostAndPorts;
-        IConnection? connection;
+        IConnection connection;
         bool isDisposed = false;
 
         /// <summary>
