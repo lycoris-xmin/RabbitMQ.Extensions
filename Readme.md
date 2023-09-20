@@ -1,6 +1,17 @@
-## **RabbitMQ一些常用的功能简单扩展,方便易用**
 
-### 集成了延迟队列(`rabbitmq_delayed_message_exchange`插件)，目前延迟插件仅支持`路由模式(Direct)`
+
+### 扩展支持延迟队列(`rabbitmq_delayed_message_exchange`插件)
+**[仓库地址：rabbitmq_delayed_message_exchange](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange)**
+
+### 安装方式
+
+```shell
+// .net cli
+dotnet add package Lycoris.RabbitMQ.Extensions
+// package manager
+Install-Package Lycoris.RabbitMQ.Extensions
+```
+
 
 ### **一、注册扩展**
 
