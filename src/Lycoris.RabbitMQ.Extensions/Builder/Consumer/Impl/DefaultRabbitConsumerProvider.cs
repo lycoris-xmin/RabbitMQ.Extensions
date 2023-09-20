@@ -1,6 +1,9 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using Lycoris.RabbitMQ.Extensions.Impl;
 using Lycoris.RabbitMQ.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
 {
@@ -10,9 +13,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
     internal sealed class DefaultRabbitConsumerProvider : IRabbitConsumerProvider
     {
         private readonly RabbitConsumerOptions _rabbitConsumerOptions;
-        private readonly string exchange;
-        private readonly string queue;
-        private ListenResult? listenResult;
+        private ListenResult listenResult;
         private bool disposed = false;
         private readonly Action<RecieveResult> action;
 
@@ -26,9 +27,8 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 
-            exchange = string.Empty;
-
-            this.queue = queue;
+            this.Exchange = string.Empty;
+            this.Queue = queue;
             this.action = action;
 
             Consumer = RabbitConsumer.Create(rabbitConsumerOptions);
@@ -45,12 +45,22 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 
-            this.exchange = exchange;
-            this.queue = queue;
+            this.Exchange = exchange;
+            this.Queue = queue;
             this.action = action;
 
             Consumer = RabbitConsumer.Create(rabbitConsumerOptions);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Exchange { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Queue { get; }
 
         /// <summary>
         /// 
@@ -81,9 +91,9 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
 
             if (listenResult == null)
             {
-                if (string.IsNullOrEmpty(exchange))
+                if (string.IsNullOrEmpty(this.Exchange))
                 {
-                    listenResult = Consumer.Listen(queue, options =>
+                    listenResult = Consumer.Listen(this.Queue, options =>
                     {
                         options.AutoDelete = _rabbitConsumerOptions.AutoDelete;
                         options.Durable = _rabbitConsumerOptions.Durable;
@@ -94,7 +104,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
                 }
                 else
                 {
-                    listenResult = Consumer.Listen(exchange, queue, options =>
+                    listenResult = Consumer.Listen(this.Exchange, this.Queue, options =>
                     {
                         options.AutoDelete = _rabbitConsumerOptions.AutoDelete;
                         options.Durable = _rabbitConsumerOptions.Durable;
@@ -116,13 +126,13 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <returns></returns>
         public override string ToString()
         {
-            if (string.IsNullOrEmpty(exchange))
+            if (string.IsNullOrEmpty(this.Exchange))
             {
-                return $"queue:{queue} from {Consumer}";
+                return $"queue:{this.Queue} from {Consumer}";
             }
             else
             {
-                return $"queue:{queue}(exchange:{exchange}) from {Consumer}";
+                return $"queue:{this.Queue}(exchange:{this.Exchange}) from {Consumer}";
             }
         }
     }

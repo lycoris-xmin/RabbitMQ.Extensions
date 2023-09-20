@@ -1,11 +1,12 @@
-﻿using Lycoris.Base.Logging;
-using Lycoris.RabbitMQ.Extensions.Builder;
+﻿using Lycoris.RabbitMQ.Extensions.Builder;
 using Lycoris.RabbitMQ.Extensions.Builder.Consumer;
 using Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl;
 using Lycoris.RabbitMQ.Extensions.Impl;
 using Lycoris.RabbitMQ.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
+using System.Linq;
 
 namespace Lycoris.RabbitMQ.Extensions
 {
@@ -21,6 +22,11 @@ namespace Lycoris.RabbitMQ.Extensions
         /// </summary>
         /// <param name="services"></param>
         public RabbitMQBuilder(IServiceCollection services) => this.services = services;
+
+        /// <summary>
+        /// 禁用消费者自启动监听
+        /// </summary>
+        public bool DisableRabbitConsumerHostedListen { get; set; } = false;
 
         /// <summary>
         /// 添加多个RabbitMQ配置(可以添加多个)
@@ -71,16 +77,10 @@ namespace Lycoris.RabbitMQ.Extensions
             // 验证基础配置
             option.CheckBaseOptions();
 
-            if (!services.Any(f => f.ImplementationType == typeof(RabbitConsumerHostedService)))
-                services.AddHostedService<RabbitConsumerHostedService>();
+            if (!this.DisableRabbitConsumerHostedListen)
+                services.AddRabbitConsumerHostedListen();
 
             return new RabbitConsumerBuilder(services, option);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void UseLycorisLogger() => services.AddDefaultLoggerFactory();
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using Lycoris.RabbitMQ.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
 {
@@ -46,8 +47,10 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
             {
                 return new DefaultRabbitConsumerProvider(queue, _rabbitConsumerOptions, result =>
                 {
-                    using var scope = serviceProvider.CreateScope();
-                    onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                    }
                 });
             });
 
@@ -73,8 +76,10 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
             {
                 return new DefaultRabbitConsumerProvider(exchange, queue, _rabbitConsumerOptions, result =>
                 {
-                    using var scope = serviceProvider.CreateScope();
-                    onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                    }
                 });
             });
 

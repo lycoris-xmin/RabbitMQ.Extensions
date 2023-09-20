@@ -1,4 +1,5 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions
 {

@@ -1,8 +1,9 @@
-﻿using Lycoris.Base.Logging;
-using Lycoris.RabbitMQ.Extensions.Builder.Consumer;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Lycoris.RabbitMQ.Extensions.Builder.Consumer;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
 {
@@ -11,25 +12,18 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// </summary>
     public sealed class RabbitConsumerHostedService : IHostedService
     {
-        private readonly ILogger? logger;
-        private readonly ILycorisLogger? LycorisLogger;
         private readonly IEnumerable<IRabbitConsumerProvider> _rabbitConsumerProviders;
+        private readonly IRabbitMqLogger _logger;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="serviceProvider"></param>
+        /// <param name="factory"></param>
         /// <param name="rabbitConsumerProviders"></param>
-        public RabbitConsumerHostedService(IServiceProvider serviceProvider,
-                                           IEnumerable<IRabbitConsumerProvider> rabbitConsumerProviders)
+        public RabbitConsumerHostedService(ILoggerFactory factory, IEnumerable<IRabbitConsumerProvider> rabbitConsumerProviders)
         {
-            var factory = serviceProvider.GetService<ILycorisLoggerFactory>();
-            if (factory != null)
-                LycorisLogger = factory?.CreateLogger<RabbitConsumerHostedService>();
-            else
-                logger = serviceProvider.GetService<ILogger<RabbitConsumerHostedService>>();
-
             _rabbitConsumerProviders = rabbitConsumerProviders;
+            _logger = factory != null ? new RabbitMqLogger(factory.CreateLogger<RabbitConsumerHostedService>()) : null;
         }
 
         /// <summary>
@@ -42,21 +36,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             foreach (var provider in _rabbitConsumerProviders)
             {
                 await provider.ListenAsync();
-
-                if (LycorisLogger != null)
-                {
-                    LycorisLogger.Info($"rabbitmq consumer listen:{provider}");
-                }
-                else if (logger != null)
-                {
-                    logger.LogInformation($"rabbitmq consumer listen:{provider}");
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"rabbitmq consumer listen:{provider}");
-                    Console.ResetColor();
-                }
+                _logger?.Info($"rabbitmq consumer listen:{provider}");
             }
         }
 
@@ -72,22 +52,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 foreach (var provider in _rabbitConsumerProviders)
                 {
                     provider.Dispose();
-
-                    if (LycorisLogger != null)
-                    {
-                        LycorisLogger.Info($"rabbitmq consumer stoped:{provider}");
-
-                    }
-                    else if (logger != null)
-                    {
-                        logger.LogInformation($"rabbitmq consumer stoped:{provider}");
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine($"rabbitmq consumer stoped:{provider}");
-                        Console.ResetColor();
-                    }
+                    _logger?.Info($"rabbitmq consumer stoped:{provider}");
                 }
             });
 

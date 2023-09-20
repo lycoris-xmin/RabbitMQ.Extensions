@@ -1,4 +1,6 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Impl;
+using System;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer
 {
@@ -7,6 +9,16 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer
     /// </summary>
     public interface IRabbitConsumerProvider : IDisposable
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        string Exchange { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        string Queue { get; }
+
         /// <summary>
         /// 消费者
         /// </summary>

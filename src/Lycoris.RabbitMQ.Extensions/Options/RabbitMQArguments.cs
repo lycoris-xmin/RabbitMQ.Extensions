@@ -1,4 +1,6 @@
-﻿namespace Lycoris.RabbitMQ.Extensions.Options
+﻿using System.Collections.Generic;
+
+namespace Lycoris.RabbitMQ.Extensions.Options
 {
     /// <summary>
     /// 
@@ -10,7 +12,7 @@
         /// </summary>
         public static Dictionary<string, object> Default
         {
-            get => new()
+            get => new Dictionary<string, object>()
             {
                 { "x-queue-type", "classic" }
             };
@@ -21,7 +23,7 @@
         /// </summary>
         public static Dictionary<string, object> Delayed
         {
-            get => new()
+            get => new Dictionary<string, object>()
             {
                 { "x-delayed-type", "direct" },
                 { "x-queue-type", "classic" }

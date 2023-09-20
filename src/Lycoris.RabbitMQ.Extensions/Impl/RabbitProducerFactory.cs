@@ -1,5 +1,6 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Builder;
 using Lycoris.RabbitMQ.Extensions.Options;
+using System;
 using System.Collections.Concurrent;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
@@ -36,7 +37,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
             lock (_clientProducers)
             {
-                if (_clientProducers.TryGetValue(name, out IRabbitClientProducer? rabbitClientProducer) && rabbitClientProducer != null)
+                if (_clientProducers.TryGetValue(name, out IRabbitClientProducer rabbitClientProducer) && rabbitClientProducer != null)
                 {
                     if (rabbitClientProducer is RabbitClientProducer producer && !producer.Disposed)
                         return rabbitClientProducer;

@@ -3,6 +3,8 @@ using Lycoris.RabbitMQ.Extensions.DataModel;
 using Lycoris.RabbitMQ.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System;
+using System.Threading;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
 {
@@ -29,7 +31,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="fetchCount"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        private static ListenResult ConsumeInternal(IModel channel, string queue, bool autoAck, ushort? fetchCount, Action<RecieveResult>? received)
+        private static ListenResult ConsumeInternal(IModel channel, string queue, bool autoAck, ushort? fetchCount, Action<RecieveResult> received)
         {
             if (fetchCount != null)
                 channel.BasicQos(0, fetchCount.Value, true);
@@ -41,35 +43,39 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 consumer.Received += (sender, e) =>
                 {
                     var cancellationTokenSource = new CancellationTokenSource();
-                    using var result = new RecieveResult(e, cancellationTokenSource);
-
-                    if (!autoAck)
+                    using (var result = new RecieveResult(e, cancellationTokenSource))
                     {
-                        cancellationTokenSource.Token.Register(r =>
-                        {
-                            if (r == null)
-                                throw new ArgumentNullException(nameof(r));
 
-                            if (r is not RecieveResult recieveResult)
-                                throw new ArgumentNullException(nameof(recieveResult));
-
-                            if (recieveResult.IsCommit)
-                                channel.BasicAck(e.DeliveryTag, false);
-                            else
-                                channel.BasicNack(e.DeliveryTag, false, recieveResult.Requeue);
-
-                        }, result);
-                    }
-
-                    try
-                    {
-                        received.Invoke(result);
-                    }
-                    catch
-                    {
                         if (!autoAck)
                         {
-                            result.RollBack();
+                            cancellationTokenSource.Token.Register(r =>
+                            {
+                                if (r == null)
+                                    throw new ArgumentNullException(nameof(r));
+
+                                if (r is RecieveResult recieveResult)
+                                {
+                                    if (recieveResult.IsCommit)
+                                        channel.BasicAck(e.DeliveryTag, false);
+                                    else
+                                        channel.BasicNack(e.DeliveryTag, false, recieveResult.Requeue);
+                                }
+                                else
+                                    throw new ArgumentNullException(nameof(recieveResult));
+
+                            }, result);
+                        }
+
+                        try
+                        {
+                            received.Invoke(result);
+                        }
+                        catch
+                        {
+                            if (!autoAck)
+                            {
+                                result.RollBack();
+                            }
                         }
                     }
 
@@ -98,9 +104,11 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, ConsumeQueueOptions? options = null, Action<RecieveResult>? received = null)
+        public ListenResult Listen(string queue, ConsumeQueueOptions options = null, Action<RecieveResult> received = null)
         {
-            options ??= new ConsumeQueueOptions();
+            if (options == null)
+                options = new ConsumeQueueOptions();
+
             var channel = GetChannel();
             PrepareQueueChannel(channel, queue, options);
 
@@ -114,7 +122,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, Action<ConsumeQueueOptions> configure, Action<RecieveResult>? received = null)
+        public ListenResult Listen(string queue, Action<ConsumeQueueOptions> configure, Action<RecieveResult> received = null)
         {
             var options = new ConsumeQueueOptions();
             configure?.Invoke(options);
@@ -131,7 +139,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, ExchangeConsumeQueueOptions? options = null, Action<RecieveResult>? received = null)
+        public ListenResult Listen(string exchange, string queue, ExchangeConsumeQueueOptions options = null, Action<RecieveResult> received = null)
         {
             if (string.IsNullOrEmpty(exchange))
                 throw new ArgumentException("exchange cannot be empty", nameof(exchange));
@@ -142,7 +150,9 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             if (options.Type == RabbitExchangeType.None)
                 throw new NotSupportedException($"{nameof(RabbitExchangeType)} must be specified");
 
-            options ??= new ExchangeConsumeQueueOptions();
+            if (options == null)
+                options = new ExchangeConsumeQueueOptions();
+
             var channel = GetChannel();
 
             PrepareExchangeChannel(channel, exchange, options);
@@ -157,7 +167,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, Action<ExchangeConsumeQueueOptions> configure, Action<RecieveResult>? received = null)
+        public ListenResult Listen(string exchange, string queue, Action<ExchangeConsumeQueueOptions> configure, Action<RecieveResult> received = null)
         {
             var options = new ExchangeConsumeQueueOptions();
             configure?.Invoke(options);

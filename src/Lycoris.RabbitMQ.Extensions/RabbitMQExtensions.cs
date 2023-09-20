@@ -1,6 +1,8 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Builder.Consumer;
 using Lycoris.RabbitMQ.Extensions.DataModel;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions
 {
@@ -98,9 +100,7 @@ namespace Lycoris.RabbitMQ.Extensions
             builder.Services.AddTransient(listenerType);
             return builder.AddListener(queue, (serviceProvider, result) =>
             {
-                var listenner = serviceProvider.GetService(listenerType) as IRabbitConsumerListener;
-
-                if (listenner == null)
+                if (!(serviceProvider.GetService(listenerType) is IRabbitConsumerListener listenner))
                     throw new ArgumentNullException(nameof(listenner));
 
                 listenner.ConsumeAsync(result).Wait();
@@ -133,9 +133,7 @@ namespace Lycoris.RabbitMQ.Extensions
             builder.Services.AddTransient(listenerType);
             return builder.AddListener(exchange, queue, (serviceProvider, result) =>
             {
-                var listenner = serviceProvider.GetService(listenerType) as IRabbitConsumerListener;
-
-                if (listenner == null)
+                if (!(serviceProvider.GetService(listenerType) is IRabbitConsumerListener listenner))
                     throw new ArgumentNullException(nameof(listenner));
 
                 listenner.ConsumeAsync(result).Wait();

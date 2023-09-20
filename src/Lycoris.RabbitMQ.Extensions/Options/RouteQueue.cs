@@ -1,4 +1,5 @@
-﻿namespace Lycoris.RabbitMQ.Extensions.Options
+﻿using System.Collections.Generic;
+namespace Lycoris.RabbitMQ.Extensions.Options
 {
     /// <summary>
     /// 

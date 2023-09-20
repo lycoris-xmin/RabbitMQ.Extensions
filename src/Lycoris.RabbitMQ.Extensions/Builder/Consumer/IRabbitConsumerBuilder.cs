@@ -1,5 +1,6 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer
 {

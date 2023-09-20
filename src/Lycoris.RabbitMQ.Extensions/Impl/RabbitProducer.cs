@@ -2,6 +2,9 @@
 using Lycoris.RabbitMQ.Extensions.DataModel;
 using Lycoris.RabbitMQ.Extensions.Options;
 using RabbitMQ.Client;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
@@ -27,7 +30,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="message"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string message, QueueOptions? options = null)
+        public void Publish(string queue, string message, QueueOptions options = null)
             => Publish(queue, new string[] { message }, options);
 
         /// <summary>
@@ -36,14 +39,14 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="messages"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string[] messages, QueueOptions? options = null)
+        public void Publish(string queue, string[] messages, QueueOptions options = null)
         {
             if (string.IsNullOrEmpty(queue))
-            {
                 throw new ArgumentException("queue cannot be empty", nameof(queue));
-            }
 
-            options ??= new QueueOptions();
+            if (options == null)
+                options = new QueueOptions();
+
             var channel = GetChannel();
             PrepareQueueChannel(channel, queue, options);
 
@@ -64,7 +67,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="routingKey"></param>
         /// <param name="message"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, string routingKey, string message, ExchangeQueueOptions? options = null)
+        public void Publish(string exchange, string routingKey, string message, ExchangeQueueOptions options = null)
             => Publish(exchange, new RouteMessage() { Message = message, RoutingKey = routingKey }, options);
 
         /// <summary>
@@ -74,7 +77,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="routingKey"></param>
         /// <param name="messages"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, string routingKey, string[] messages, ExchangeQueueOptions? options = null)
+        public void Publish(string exchange, string routingKey, string[] messages, ExchangeQueueOptions options = null)
             => Publish(exchange, messages.Select(message => new RouteMessage() { Message = message, RoutingKey = routingKey }).ToArray(), options);
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="exchange"></param>
         /// <param name="routeMessage"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, RouteMessage routeMessage, ExchangeQueueOptions? options = null)
+        public void Publish(string exchange, RouteMessage routeMessage, ExchangeQueueOptions options = null)
             => Publish(exchange, new RouteMessage[] { routeMessage }, options);
 
         /// <summary>
@@ -92,14 +95,14 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="exchange"></param>
         /// <param name="routeMessages"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, RouteMessage[] routeMessages, ExchangeQueueOptions? options = null)
+        public void Publish(string exchange, RouteMessage[] routeMessages, ExchangeQueueOptions options = null)
         {
             if (string.IsNullOrEmpty(exchange))
-            {
                 throw new ArgumentException("exchange cannot be empty", nameof(exchange));
-            }
 
-            options ??= new ExchangeQueueOptions();
+            if (options == null)
+                options = new ExchangeQueueOptions();
+
             if (options.Type == RabbitExchangeType.None)
             {
                 throw new NotSupportedException($"{nameof(RabbitExchangeType)} must be specified");
@@ -113,11 +116,14 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 var buffer = Encoding.UTF8.GetBytes(routeMessage.Message);
 
-                IBasicProperties? props = null;
+                IBasicProperties props = null;
                 if (options.BasicProps != null && options.BasicProps.Count > 0)
                 {
                     props = channel.CreateBasicProperties();
-                    props.Headers ??= new Dictionary<string, object>();
+
+                    if (props.Headers == null)
+                        props.Headers = new Dictionary<string, object>();
+
                     foreach (var item in options.BasicProps)
                     {
                         props.Headers.Add(item.Key, item.Value);

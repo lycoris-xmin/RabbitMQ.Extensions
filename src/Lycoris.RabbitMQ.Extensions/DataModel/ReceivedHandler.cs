@@ -1,6 +1,4 @@
-﻿using Lycoris.RabbitMQ.Extensions.Impl;
-
-namespace Lycoris.RabbitMQ.Extensions.DataModel
+﻿namespace Lycoris.RabbitMQ.Extensions.DataModel
 {
     /// <summary>
     /// 处理结果枚举

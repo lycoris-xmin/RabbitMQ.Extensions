@@ -1,6 +1,8 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
+using System;
+using System.Threading.Tasks;
 
-namespace Lycoris.RabbitMQ.Extensions.Impl
+namespace Lycoris.RabbitMQ.Extensions
 {
     /// <summary>
     /// 
@@ -20,7 +22,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <summary>
         /// 消费上下文
         /// </summary>
-        protected RecieveResult? Context { get; private set; }
+        protected RecieveResult Context { get; private set; }
 
         /// <summary>
         /// 重新发布时间间隔(单位:毫秒,默认1000毫秒)

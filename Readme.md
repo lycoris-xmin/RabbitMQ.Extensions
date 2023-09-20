@@ -19,7 +19,7 @@ builder.Services.AddRabbitMQExtensions(builder =>
         // ip地址
         opt.Hosts = new string[] { "your mq server host" };
         // 端口号 不设置默认：5672
-        opt.Port = 5667;
+        opt.Port = 5672;
         // 账号
         opt.UserName = "your username";
         // 密码
@@ -137,6 +137,11 @@ builder.Services.AddRabbitMQExtensions(builder =>
         };
     })
     .AddListener<TestConsumer3>("exchange.your.delayexchangename", "queue.your.queuename3");
+
+    // 默认情况，扩展在程序启动时会自动启动设置了监听的消费者
+    // 如果不想自动启动，或者在启动前还有其他一些操作，则可以在当前位置禁用自动监听
+    // 禁用自动启动监听后，需要使用 IRabbitConsumerFactory.ManualStartListenAsync() 或者  IRabbitConsumerFactory.ManualStartListenAsync(string exchange, string queue)进行启动监听服务
+    builder.DisableRabbitConsumerHostedListen = false;
 });
 
 
@@ -186,7 +191,7 @@ internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary
 
 ### **二、创建消费者**
 **消费者有两种创建方式**
-- **1. 继承扩展封装好的基类：`RabbitConsumerListener`，基类做了基础的默认日志记录，和异常捕捉。**
+- **1. 继承扩展封装好的基类：`RabbitConsumerListener`，做了基础的异常捕捉。**
 
 **基类包含属性：**
 - **`Context`：当前消费者接收到的上下文实体**
@@ -194,8 +199,6 @@ internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary
 - **`Route`：当前消费者路由**
 - **`ResubmitTimeSpan`：重新发布时间间隔(单位:毫秒,默认1000毫秒)**
 
-- **`RabbitMQLogger`：新版本已经移除该属性**
-- **`DefaultLogging`：：新版本已经移除该属性**
 **基类包含重写方法：**
 - **`Task<ReceivedHandler> HandleExceptionAsync(Exception exception)`：全局异常拦截，没有重写的情况下，默认扩展返回的是回滚MQ消息**
 - 
