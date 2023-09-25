@@ -104,10 +104,10 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, ConsumeQueueOptions options = null, Action<RecieveResult> received = null)
+        public ListenResult Listen(string queue, ConsumeQueueOption options = null, Action<RecieveResult> received = null)
         {
             if (options == null)
-                options = new ConsumeQueueOptions();
+                options = new ConsumeQueueOption();
 
             var channel = GetChannel();
             PrepareQueueChannel(channel, queue, options);
@@ -122,9 +122,9 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, Action<ConsumeQueueOptions> configure, Action<RecieveResult> received = null)
+        public ListenResult Listen(string queue, Action<ConsumeQueueOption> configure, Action<RecieveResult> received = null)
         {
-            var options = new ConsumeQueueOptions();
+            var options = new ConsumeQueueOption();
             configure?.Invoke(options);
             return Listen(queue, options, received);
         }
@@ -139,7 +139,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, ExchangeConsumeQueueOptions options = null, Action<RecieveResult> received = null)
+        public ListenResult Listen(string exchange, string queue, ExchangeConsumeQueueOption options = null, Action<RecieveResult> received = null)
         {
             if (string.IsNullOrEmpty(exchange))
                 throw new ArgumentException("exchange cannot be empty", nameof(exchange));
@@ -151,7 +151,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 throw new NotSupportedException($"{nameof(RabbitExchangeType)} must be specified");
 
             if (options == null)
-                options = new ExchangeConsumeQueueOptions();
+                options = new ExchangeConsumeQueueOption();
 
             var channel = GetChannel();
 
@@ -167,9 +167,9 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, Action<ExchangeConsumeQueueOptions> configure, Action<RecieveResult> received = null)
+        public ListenResult Listen(string exchange, string queue, Action<ExchangeConsumeQueueOption> configure, Action<RecieveResult> received = null)
         {
-            var options = new ExchangeConsumeQueueOptions();
+            var options = new ExchangeConsumeQueueOption();
             configure?.Invoke(options);
             return Listen(exchange, queue, options, received);
         }
@@ -180,7 +180,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         /// <param name="rabbitBaseOptions"></param>
         /// <returns></returns>
-        public static RabbitConsumer Create(RabbitBaseOptions rabbitBaseOptions)
+        public static RabbitConsumer Create(RabbitConsumerOption rabbitBaseOptions)
         {
             var consumer = new RabbitConsumer(rabbitBaseOptions.Hosts)
             {

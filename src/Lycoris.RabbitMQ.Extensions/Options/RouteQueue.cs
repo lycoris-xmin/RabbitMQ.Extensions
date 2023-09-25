@@ -11,7 +11,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// </summary>
         public RouteQueue()
         {
-            Options = new QueueOptions();
+            Options = new QueueOption();
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <summary>
         /// 队列选项
         /// </summary>
-        public QueueOptions Options { get; set; }
+        public QueueOption Options { get; set; }
 
         /// <summary>
         /// 参数

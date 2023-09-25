@@ -40,6 +40,23 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <summary>
         /// 启动监听
         /// </summary>
+        /// <param name="queue"></param>
+        /// <returns></returns>
+        public async Task ManualStartListenAsync(string queue)
+        {
+            foreach (var provider in _rabbitConsumerProviders)
+            {
+                if (string.IsNullOrEmpty(provider.Exchange) && provider.Queue == queue)
+                {
+                    await provider.ListenAsync();
+                    _logger?.Info($"rabbitmq consumer listen:{provider}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 启动监听
+        /// </summary>
         /// <param name="exchange"></param>
         /// <param name="queue"></param>
         /// <returns></returns>
@@ -65,6 +82,25 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 provider.Dispose();
                 _logger?.Info($"rabbitmq consumer stoped:{provider}");
+            }
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 暂停监听
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <returns></returns>
+        public async Task ManualStopListenAsync(string queue)
+        {
+            foreach (var provider in _rabbitConsumerProviders)
+            {
+                if (string.IsNullOrEmpty(provider.Exchange) && provider.Queue == queue)
+                {
+                    provider.Dispose();
+                    _logger?.Info($"rabbitmq consumer stoped:{provider}");
+                }
             }
 
             await Task.CompletedTask;

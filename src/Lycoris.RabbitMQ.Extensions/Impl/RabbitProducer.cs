@@ -30,7 +30,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="message"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string message, QueueOptions options = null)
+        public void Publish(string queue, string message, QueueOption options = null)
             => Publish(queue, new string[] { message }, options);
 
         /// <summary>
@@ -39,13 +39,13 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="messages"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string[] messages, QueueOptions options = null)
+        public void Publish(string queue, string[] messages, QueueOption options = null)
         {
             if (string.IsNullOrEmpty(queue))
                 throw new ArgumentException("queue cannot be empty", nameof(queue));
 
             if (options == null)
-                options = new QueueOptions();
+                options = new QueueOption();
 
             var channel = GetChannel();
             PrepareQueueChannel(channel, queue, options);
@@ -142,7 +142,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         /// <param name="rabbitBaseOptions"></param>
         /// <returns></returns>
-        public static RabbitProducer Create(RabbitBaseOptions rabbitBaseOptions)
+        public static RabbitProducer Create(RabbitProducerOption rabbitBaseOptions)
         {
             var producer = new RabbitProducer(rabbitBaseOptions.Hosts)
             {

@@ -1,6 +1,5 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using Lycoris.RabbitMQ.Extensions.Impl;
-using Lycoris.RabbitMQ.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
     /// </summary>
     internal sealed class DefaultRabbitConsumerProvider : IRabbitConsumerProvider
     {
-        private readonly RabbitConsumerOptions _rabbitConsumerOptions;
+        private readonly Options.RabbitConsumerOption _rabbitConsumerOptions;
         private ListenResult listenResult;
         private bool disposed = false;
         private readonly Action<RecieveResult> action;
@@ -23,7 +22,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <param name="queue">队列名称</param>
         /// <param name="rabbitConsumerOptions"></param>
         /// <param name="action"></param>
-        public DefaultRabbitConsumerProvider(string queue, RabbitConsumerOptions rabbitConsumerOptions, Action<RecieveResult> action)
+        public DefaultRabbitConsumerProvider(string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Action<RecieveResult> action)
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 
@@ -41,7 +40,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <param name="queue">队列名称</param>
         /// <param name="rabbitConsumerOptions"></param>
         /// <param name="action"></param>
-        public DefaultRabbitConsumerProvider(string exchange, string queue, RabbitConsumerOptions rabbitConsumerOptions, Action<RecieveResult> action)
+        public DefaultRabbitConsumerProvider(string exchange, string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Action<RecieveResult> action)
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 

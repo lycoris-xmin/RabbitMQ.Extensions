@@ -8,15 +8,15 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
     internal static class RabbitMQOptionsStore
     {
         private const string DelayPropsKey = "x-delay";
-        private static readonly ConcurrentDictionary<string, RabbitOptions> _RabbitOptions = new ConcurrentDictionary<string, RabbitOptions>();
-        private static readonly ConcurrentDictionary<string, RabbitProducerOptions> _RabbitProducerOptions = new ConcurrentDictionary<string, RabbitProducerOptions>();
+        private static readonly ConcurrentDictionary<string, RabbitOption> _RabbitOptions = new ConcurrentDictionary<string, RabbitOption>();
+        private static readonly ConcurrentDictionary<string, RabbitProducerOption> _RabbitProducerOptions = new ConcurrentDictionary<string, RabbitProducerOption>();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="configureName"></param>
         /// <param name="options"></param>
-        public static void AddOrUpdateRabbitMQOption(string configureName, RabbitOptions options)
+        public static void AddOrUpdateRabbitMQOption(string configureName, RabbitOption options)
             => _RabbitOptions.TryAdd(configureName, options);
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitOptions GetRabbitMQOption(string configureName)
+        public static RabbitOption GetRabbitMQOption(string configureName)
             => _RabbitOptions.ContainsKey(configureName) ? _RabbitOptions[configureName] : null;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <param name="options"></param>
-        public static void AddOrUpdateRabbitProducerOptions(string configureName, RabbitProducerOptions options)
+        public static void AddOrUpdateRabbitProducerOptions(string configureName, RabbitProducerOption options)
         {
             if (options.Arguments == null)
                 options.Arguments = new Dictionary<string, object>();
@@ -76,7 +76,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitProducerOptions GetRabbitProducerOptions(string configureName)
+        public static RabbitProducerOption GetRabbitProducerOptions(string configureName)
             => _RabbitProducerOptions.ContainsKey(configureName) ? _RabbitProducerOptions[configureName] : null;
     }
 }

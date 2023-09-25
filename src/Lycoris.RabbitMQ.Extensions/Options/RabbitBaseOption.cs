@@ -5,7 +5,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
     /// <summary>
     /// 
     /// </summary>
-    public abstract class RabbitBaseOptions
+    public abstract class RabbitBaseOption
     {
         /// <summary>
         /// 服务节点,可以是单独的hostname或者IP,也可以是host:port或者ip:port形式

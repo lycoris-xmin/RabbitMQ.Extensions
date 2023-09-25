@@ -1,5 +1,4 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
-using Lycoris.RabbitMQ.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -8,7 +7,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
     /// <summary>
     /// 
     /// </summary>
-    internal sealed class RabbitConsumerBuilder : IRabbitConsumerBuilder
+    internal sealed class DafaultRabbitConsumerBuilder : IRabbitConsumerBuilder
     {
         /// <summary>
         /// 
@@ -18,14 +17,14 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <summary>
         /// 
         /// </summary>
-        private readonly RabbitConsumerOptions _rabbitConsumerOptions;
+        private readonly Options.RabbitConsumerOption _rabbitConsumerOptions;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="services"></param>
         /// <param name="rabbitConsumerOptions"></param>
-        public RabbitConsumerBuilder(IServiceCollection services, RabbitConsumerOptions rabbitConsumerOptions)
+        public DafaultRabbitConsumerBuilder(IServiceCollection services, Options.RabbitConsumerOption rabbitConsumerOptions)
         {
             Services = services;
             _rabbitConsumerOptions = rabbitConsumerOptions;

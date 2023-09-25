@@ -16,6 +16,13 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <summary>
         /// 启动监听
         /// </summary>
+        /// <param name="queue"></param>
+        /// <returns></returns>
+        Task ManualStartListenAsync(string queue);
+
+        /// <summary>
+        /// 启动监听
+        /// </summary>
         /// <param name="exchange"></param>
         /// <param name="queue"></param>
         /// <returns></returns>
@@ -26,6 +33,13 @@ namespace Lycoris.RabbitMQ.Extensions
         /// </summary>
         /// <returns></returns>
         Task ManualStopListenAsync();
+
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <returns></returns>
+        Task ManualStopListenAsync(string queue);
 
         /// <summary>
         /// 停止监听

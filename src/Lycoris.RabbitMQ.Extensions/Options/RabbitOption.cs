@@ -6,7 +6,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
     /// <summary>
     /// 
     /// </summary>
-    public class RabbitOptions : RabbitBaseOptions
+    public class RabbitOption : RabbitBaseOption
     {
         /// <summary>
         /// 是否持久化
@@ -33,7 +33,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void CheckBaseOptions()
+        internal void CheckBaseOptions()
         {
             if (this.Hosts == null || this.Hosts.Length == 0)
                 throw new ArgumentNullException(nameof(this.Hosts));

@@ -9,13 +9,13 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// </summary>
     public sealed class RabbitClientProducer : BaseProducerPool, IRabbitClientProducer
     {
-        private readonly RabbitProducerOptions _rabbitProducerOptions;
+        private readonly RabbitProducerOption _rabbitProducerOptions;
 
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="rabbitProducerOptions"></param>
-        public RabbitClientProducer(RabbitProducerOptions rabbitProducerOptions) : base(rabbitProducerOptions)
+        public RabbitClientProducer(RabbitProducerOption rabbitProducerOptions) : base(rabbitProducerOptions)
         {
             _rabbitProducerOptions = rabbitProducerOptions;
         }
@@ -39,7 +39,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 if (!string.IsNullOrEmpty(queue))
                 {
-                    producer.Publish(queue, messages, new QueueOptions()
+                    producer.Publish(queue, messages, new QueueOption()
                     {
                         Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                         AutoDelete = _rabbitProducerOptions.AutoDelete,
@@ -64,7 +64,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 if (!string.IsNullOrEmpty(queue))
                 {
-                    producer.Publish(queue, messages, new QueueOptions()
+                    producer.Publish(queue, messages, new QueueOption()
                     {
                         Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                         AutoDelete = _rabbitProducerOptions.AutoDelete,

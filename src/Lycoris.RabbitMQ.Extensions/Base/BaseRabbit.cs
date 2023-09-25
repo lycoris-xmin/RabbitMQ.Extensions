@@ -155,7 +155,7 @@ namespace Lycoris.RabbitMQ.Extensions.Base
         /// <param name="channel"></param>
         /// <param name="queue"></param>
         /// <param name="options"></param>
-        protected static void PrepareQueueChannel(IModel channel, string queue, QueueOptions options)
+        protected static void PrepareQueueChannel(IModel channel, string queue, QueueOption options)
         {
             //这里的exclusive参数表示是否与当前的channel绑定
             channel.QueueDeclare(queue, options.Durable, false, options.AutoDelete, options.Arguments ?? new Dictionary<string, object>());

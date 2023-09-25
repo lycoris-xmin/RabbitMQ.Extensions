@@ -9,7 +9,7 @@ namespace Lycoris.RabbitMQ.Extensions
     /// <summary>
     /// 
     /// </summary>
-    public static class RabbitMQExtensions
+    public static class RabbitMQExtension
     {
         /// <summary>
         /// 普通的往队列发送消息

@@ -11,13 +11,13 @@ namespace Lycoris.RabbitMQ.Extensions.Base
     public abstract class BaseProducerPool : IDisposable
     {
         private readonly ConcurrentQueue<RabbitProducer> rabbitProducers;
-        private readonly RabbitOptions _rabbitOptions;
+        private readonly RabbitProducerOption _rabbitOptions;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="rabbitOptions"></param>
-        protected BaseProducerPool(RabbitOptions rabbitOptions)
+        protected BaseProducerPool(RabbitProducerOption rabbitOptions)
         {
             _rabbitOptions = rabbitOptions;
             rabbitProducers = new ConcurrentQueue<RabbitProducer>();

@@ -5,7 +5,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
     /// <summary>
     /// 
     /// </summary>
-    public class QueueOptions
+    public class QueueOption
     {
         /// <summary>
         /// 是否持久化

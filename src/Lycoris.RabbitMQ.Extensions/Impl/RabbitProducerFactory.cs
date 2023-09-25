@@ -33,7 +33,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             var rabbitProducerOptions = RabbitMQOptionsStore.GetRabbitProducerOptions(name);
 
             if (rabbitProducerOptions == null || rabbitProducerOptions.Hosts == null || rabbitProducerOptions.Hosts.Length == 0)
-                throw new InvalidOperationException($"{nameof(RabbitProducerOptions)} named '{name}' is not configured");
+                throw new InvalidOperationException($"{nameof(RabbitProducerOption)} named '{name}' is not configured");
 
             lock (_clientProducers)
             {

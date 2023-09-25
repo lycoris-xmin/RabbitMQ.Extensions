@@ -3,7 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
-    public class ConsumeQueueOptions : QueueOptions
+    public class ExchangeConsumeQueueOption : ExchangeQueueOptions
     {
         /// <summary>
         /// 是否自动提交
