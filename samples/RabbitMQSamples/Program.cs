@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
-builder.Services.AddRabbitMQExtensions(opt =>
+var mqBuilder = builder.Services.AddRabbitMQExtensions(opt =>
 {
     // ip地址
     opt.Hosts = new string[] { "yout rabbitmq service ip" };
@@ -26,7 +25,9 @@ builder.Services.AddRabbitMQExtensions(opt =>
     opt.AutoDelete = true;
     // 
     opt.DisableRabbitConsumerHostedListen = true;
-}).AddRabbitProducer(opt =>
+});
+
+mqBuilder.AddRabbitProducer(opt =>
 {
     // 保留发布者数 默认：5
     opt.InitializeCount = 5;
