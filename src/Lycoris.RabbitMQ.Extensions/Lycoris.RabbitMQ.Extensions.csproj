@@ -7,7 +7,7 @@
     <RepositoryUrl>https://github.com/lycoris-xmin/RabbitMQ.Extensions</RepositoryUrl>
     <Authors>lycoris</Authors>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>6.0.5</Version>
+    <Version>6.0.6</Version>
     <Description>RabbitMQ使用扩展，简化了生产者与消费者的使用，支持延迟队列</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>

@@ -23,18 +23,17 @@ var mqBuilder = builder.Services.AddRabbitMQExtensions(opt =>
     opt.Durable = true;
     // 是否自动删除 不设置默认：false
     opt.AutoDelete = true;
-    // 
-    opt.DisableRabbitConsumerHostedListen = true;
 });
 
-mqBuilder.AddRabbitProducer(opt =>
+mqBuilder.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>(opt =>
 {
     // 保留发布者数 默认：5
     opt.InitializeCount = 5;
     // 交换机名称
     opt.Exchange = "exchange.your.exchangename";
     // 交换机类型
-    opt.Type = RabbitExchangeType.Direct;
+    opt.Type = RabbitExchangeType.Delayed;
+    opt.DelayTime = 5;
     // 路由队列
     opt.RouteQueues = new RouteQueue[]
     {
@@ -42,25 +41,11 @@ mqBuilder.AddRabbitProducer(opt =>
         {
             Route = "route.your.routename",
             Queue = "queue.your.queuename"
-        }
-    };
-}).AddRabbitProducer(opt =>
-{
-    // 保留发布者数 默认：5
-    opt.InitializeCount = 5;
-    // 交换机名称
-    opt.Exchange = "exchange.your.delayexchangename";
-    // 交换机类型
-    opt.Type = RabbitExchangeType.Delayed;
-    // 延迟时间
-    opt.DelayTime = 5;
-    // 路由队列
-    opt.RouteQueues = new RouteQueue[]
-    {
+        },
         new RouteQueue()
         {
-            Route = "route.your.routename3",
-            Queue = "queue.your.queuename3"
+            Route = "route.your.routename2",
+            Queue = "queue.your.queuename2"
         }
     };
 }).AddRabbitConsumer(opt =>
@@ -70,7 +55,7 @@ mqBuilder.AddRabbitProducer(opt =>
     // 每次发送消息条数 默认：2
     opt.FetchCount = 2;
     // 交换机类型
-    opt.Type = RabbitExchangeType.Direct;
+    opt.Type = RabbitExchangeType.Delayed;
     // 路由队列
     opt.RouteQueues = new RouteQueue[]
     {
@@ -87,6 +72,7 @@ mqBuilder.AddRabbitProducer(opt =>
     };
 
     opt.AddListener<TestConsumer>("exchange.your.exchangename", "queue.your.queuename");
+    opt.AddListener<TestConsumer2>("exchange.your.exchangename", "queue.your.queuename2");
 });
 
 var app = builder.Build();
@@ -98,11 +84,9 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", ([FromServices] IRabbitProducerFactory factory) =>
+app.MapGet("/weatherforecast", ( [FromServices] IRabbitProducerService producer) =>
 {
-    var producer = factory.Create("DefaultProducer");
-    producer.Publish("route.your.routename", "this is push TestConsumer");
-    producer.Publish("route.your.routename2", "this is push TestConsumer2");
+    producer.Test();
 
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
@@ -112,10 +96,6 @@ app.MapGet("/weatherforecast", ([FromServices] IRabbitProducerFactory factory) =
             summaries[Random.Shared.Next(summaries.Length)]
         ))
         .ToArray();
-
-    var delay = factory.Create("DefaultDelayProducer");
-
-    delay.Publish("route.your.routename3", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
     return forecast;
 });

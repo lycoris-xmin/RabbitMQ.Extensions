@@ -1,7 +1,4 @@
-﻿using Lycoris.RabbitMQ.Extensions.Builder.Consumer;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,18 +9,15 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// </summary>
     public sealed class RabbitConsumerHostedService : IHostedService
     {
-        private readonly IEnumerable<IRabbitConsumerProvider> _rabbitConsumerProviders;
-        private readonly IRabbitMqLogger _logger;
+        private readonly IRabbitConsumerFactory _consumerFactory;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="factory"></param>
-        /// <param name="rabbitConsumerProviders"></param>
-        public RabbitConsumerHostedService(ILoggerFactory factory, IEnumerable<IRabbitConsumerProvider> rabbitConsumerProviders)
+        /// <param name="consumerFactory"></param>
+        public RabbitConsumerHostedService(IRabbitConsumerFactory consumerFactory)
         {
-            _rabbitConsumerProviders = rabbitConsumerProviders;
-            _logger = factory != null ? new RabbitMqLogger(factory.CreateLogger<RabbitConsumerHostedService>()) : null;
+            _consumerFactory = consumerFactory;
         }
 
         /// <summary>
@@ -31,33 +25,14 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            foreach (var provider in _rabbitConsumerProviders)
-            {
-                await provider.ListenAsync();
-                _logger?.Info($"rabbitmq consumer listen:{provider}");
-            }
-        }
+        public Task StartAsync(CancellationToken cancellationToken) => _consumerFactory.ManualStartListenAsync();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            cancellationToken.Register(() =>
-            {
-                foreach (var provider in _rabbitConsumerProviders)
-                {
-                    provider.Dispose();
-                    _logger?.Info($"rabbitmq consumer stoped:{provider}");
-                }
-            });
-
-            await Task.CompletedTask;
-        }
+        public Task StopAsync(CancellationToken cancellationToken) => _consumerFactory.ManualStopListenAsync(cancellationToken);
     }
 }
 

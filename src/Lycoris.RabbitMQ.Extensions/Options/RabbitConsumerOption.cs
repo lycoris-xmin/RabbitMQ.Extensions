@@ -25,6 +25,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// 
         /// </summary>
         private RabbitExchangeType _Type = RabbitExchangeType.None;
+
         /// <summary>
         /// 交换机类型
         /// </summary>
@@ -92,7 +93,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
             });
         }
 
-        internal List<RabbitConsumerListenerMap> ListenerMaps { get; set; }
+        internal List<RabbitConsumerListenerMap> ListenerMaps { get; set; } = new List<RabbitConsumerListenerMap>();
 
         /// <summary>
         /// 使用基础配置

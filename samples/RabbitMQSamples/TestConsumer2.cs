@@ -3,7 +3,7 @@ using Lycoris.RabbitMQ.Extensions.DataModel;
 
 namespace RabbitMQSample
 {
-    public class TestConsumer2 : RabbitConsumerListener
+    public class TestConsumer2 : BaseRabbitConsumerListener
     {
         /// <summary>
         /// 

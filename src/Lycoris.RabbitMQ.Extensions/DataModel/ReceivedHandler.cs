@@ -15,7 +15,7 @@
         RollBack = 1,
         /// <summary>
         /// 重新放回队列(默认延迟一秒)
-        /// 可通过设置属性 <see cref="RabbitConsumerListener.ResubmitTimeSpan"/> 设置延时时间
+        /// 可通过设置属性 <see cref="BaseRabbitConsumerListener.ResubmitTimeSpan"/> 设置延时时间
         /// </summary>
         Resubmit = 2
     }

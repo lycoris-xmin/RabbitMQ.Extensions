@@ -127,11 +127,11 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         {
             if (string.IsNullOrEmpty(this.Exchange))
             {
-                return $"queue:{this.Queue} from {Consumer}";
+                return $"{this.Queue} from {Consumer}";
             }
             else
             {
-                return $"queue:{this.Queue}(exchange:{this.Exchange}) from {Consumer}";
+                return $"{this.Queue}(exchange:{this.Exchange}) from {Consumer}";
             }
         }
     }

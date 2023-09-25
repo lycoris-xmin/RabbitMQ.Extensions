@@ -24,6 +24,7 @@ namespace Lycoris.RabbitMQ.Extensions
 
         /// <summary>
         /// 禁用消费者自启动监听
+        /// 禁用后，需要在你需要使用消费者服务前，主动调用 <see cref="IRabbitConsumerFactory.ManualStartListenAsync()"/> 启用已添加的消费者服务监听
         /// </summary>
         public bool DisableRabbitConsumerHostedListen { get; set; } = false;
     }

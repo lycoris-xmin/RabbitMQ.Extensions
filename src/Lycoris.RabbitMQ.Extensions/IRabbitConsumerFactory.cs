@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions
 {
@@ -37,9 +38,24 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <summary>
         /// 停止监听
         /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task ManualStopListenAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 停止监听
+        /// </summary>
         /// <param name="queue"></param>
         /// <returns></returns>
         Task ManualStopListenAsync(string queue);
+
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task ManualStopListenAsync(string queue, CancellationToken cancellationToken);
 
         /// <summary>
         /// 停止监听
@@ -48,5 +64,14 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <param name="queue"></param>
         /// <returns></returns>
         Task ManualStopListenAsync(string exchange, string queue);
+
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="exchange"></param>
+        /// <param name="queue"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task ManualStopListenAsync(string exchange, string queue, CancellationToken cancellationToken);
     }
 }

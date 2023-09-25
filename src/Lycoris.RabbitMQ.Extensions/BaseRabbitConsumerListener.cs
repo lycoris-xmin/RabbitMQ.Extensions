@@ -7,7 +7,7 @@ namespace Lycoris.RabbitMQ.Extensions
     /// <summary>
     /// 
     /// </summary>
-    public abstract class RabbitConsumerListener : IRabbitConsumerListener
+    public abstract class BaseRabbitConsumerListener : IRabbitConsumerListener
     {
         /// <summary>
         /// 交换机
