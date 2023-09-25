@@ -176,8 +176,7 @@ mqBuilder.AddRabbitConsumer(opt =>
 public class Demo
 {
     private readonly IRabbitProducerFactory _factory;
-    private readonly IRabbitConsumerFactory _consumerFactory;
-    public class Demo(IRabbitProducerFactory factory, IRabbitConsumerFactory consumerFactory)
+    public class Demo(IRabbitProducerFactory factory)
     {
         _factory = factory;
         _consumerFactory = consumerFactory;
@@ -189,22 +188,6 @@ public class Demo
         var producer = factory.Create("DefaultProducer");
         // 发送消息
         producer.Publish("route.your.routename", "this is push TestConsumer");
-    }
-
-    public async Task ManualTest()
-    {
-        // 如果在配置中设置了 DisableRabbitConsumerHostedListen 为 true
-        // 需要在合适的地方 启动消费者监听，此时消费者才能正常的接收MQ消息
-        // 此处仅作为使用示例
-
-        // 启动所有的消费者监听
-        await _consumerFactory.ManualStartListenAsync();
-        // 启动指定的消费者监听
-        await _consumerFactory.ManualStartListenAsync("exchange.your.exchangename", "queue.your.queuename");
-        // 停止所有的消费者监听
-        await _consumerFactory.ManualStopListenAsync();
-        // 停止指定的消费者监听
-        await _consumerFactory.ManualStopListenAsync("exchange.your.exchangename", "queue.your.queuename");
     }
 }
 ```
