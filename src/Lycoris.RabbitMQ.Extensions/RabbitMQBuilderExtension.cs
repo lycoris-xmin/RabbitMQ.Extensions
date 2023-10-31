@@ -80,11 +80,10 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <summary>
         /// 添加生产者服务
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="builder"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitProducer<T>(this RabbitMQBuilder builder, Action<RabbitProducerOption> configure) where T : BaseRabbitProducerService
+        public static RabbitMQBuilder AddRabbitProducer(this RabbitMQBuilder builder, Action<RabbitProducerOption> configure)
         {
             var option = new RabbitProducerOption();
 
@@ -97,40 +96,14 @@ namespace Lycoris.RabbitMQ.Extensions
             // 验证延迟队列配置
             option.CheckDelayProps();
 
-            RabbitMQOptionsStore.AddOrUpdateRabbitProducerOptions(typeof(T).FullName, option);
-
-            builder.services.TryAddScoped<T>();
-
-            // 注册服务
-            builder.services.TryAddSingleton<IRabbitProducerFactory, RabbitProducerFactory>();
-
-            return builder;
-        }
-
-        /// <summary>
-        /// 添加生产者服务
-        /// </summary>
-        /// <typeparam name="TService"></typeparam>
-        /// <typeparam name="TImplementation"></typeparam>
-        /// <param name="builder"></param>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitProducer<TService, TImplementation>(this RabbitMQBuilder builder, Action<RabbitProducerOption> configure) where TService : class where TImplementation : BaseRabbitProducerService, TService
-        {
-            var option = new RabbitProducerOption();
-
-            // 
-            option.UseRabbitOption(builder.configureName);
-
-            // 
-            configure.Invoke(option);
-
-            // 验证延迟队列配置
-            option.CheckDelayProps();
-
-            RabbitMQOptionsStore.AddOrUpdateRabbitProducerOptions(typeof(TImplementation).FullName, option);
-
-            builder.services.TryAddScoped<TService, TImplementation>();
+            foreach (var item in option.RabbitProducer)
+            {
+                RabbitMQOptionsStore.AddOrUpdateRabbitProducerOptions(item.Value.FullName, option);
+                if (item.Key == item.Value)
+                    builder.services.TryAddScoped(item.Value);
+                else
+                    builder.services.TryAddScoped(item.Key, item.Value);
+            }
 
             // 注册服务
             builder.services.TryAddSingleton<IRabbitProducerFactory, RabbitProducerFactory>();

@@ -1,4 +1,5 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 
@@ -39,7 +40,35 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// </summary>
         public RouteQueue[] RouteQueues { get; set; } = Array.Empty<RouteQueue>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public RabbitProducerOption AddRabbitProducer<T>() where T : BaseRabbitProducerService
+        {
+            this.RabbitProducer.Add(typeof(T), typeof(T));
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <returns></returns>
+        public RabbitProducerOption AddRabbitProducer<TService, TImplementation>() where TService : class where TImplementation : BaseRabbitProducerService, TService
+        {
+            this.RabbitProducer.Add(typeof(TService), typeof(TImplementation));
+            return this;
+        }
+
         internal const string DelayPropsKey = "x-delay";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal Dictionary<Type, Type> RabbitProducer { get; set; } = new Dictionary<Type, Type>();
 
         /// <summary>
         /// 

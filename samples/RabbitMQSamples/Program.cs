@@ -25,7 +25,7 @@ var mqBuilder = builder.Services.AddRabbitMQExtensions(opt =>
     opt.AutoDelete = true;
 });
 
-mqBuilder.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>(opt =>
+mqBuilder.AddRabbitProducer(opt =>
 {
     // 保留发布者数 默认：5
     opt.InitializeCount = 5;
@@ -48,6 +48,9 @@ mqBuilder.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>(opt =
             Queue = "queue.your.queuename2"
         }
     };
+
+    opt.AddRabbitProducer<RabbitProducerService>();
+
 }).AddRabbitConsumer(opt =>
 {
     // 是否自动提交 默认：false
@@ -84,7 +87,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", ( [FromServices] IRabbitProducerService producer) =>
+app.MapGet("/weatherforecast", ([FromServices] IRabbitProducerService producer) =>
 {
     producer.Test();
 
