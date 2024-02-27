@@ -33,6 +33,7 @@ mqBuilder.AddRabbitProducer(opt =>
     opt.Exchange = "exchange.your.exchangename";
     // 交换机类型
     opt.Type = RabbitExchangeType.Delayed;
+    // 延迟队列，消息延迟发布秒数
     opt.DelayTime = 5;
     // 路由队列
     opt.RouteQueues = new RouteQueue[]
