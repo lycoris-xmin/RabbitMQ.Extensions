@@ -49,7 +49,7 @@ mqBuilder.AddRabbitProducer(opt =>
         }
     };
 
-    opt.AddRabbitProducer<RabbitProducerService>();
+    opt.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>();
 
 }).AddRabbitConsumer(opt =>
 {
