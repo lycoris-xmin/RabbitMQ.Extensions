@@ -1,5 +1,4 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 
