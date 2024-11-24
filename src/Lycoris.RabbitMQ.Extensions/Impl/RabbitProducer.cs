@@ -48,6 +48,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 options = new QueueOption();
 
             var channel = GetChannel();
+
             PrepareQueueChannel(channel, queue, options);
 
             foreach (var message in messages)
@@ -120,6 +121,8 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 if (options.BasicProps != null && options.BasicProps.Count > 0)
                 {
                     props = channel.CreateBasicProperties();
+
+                    props.Persistent = true;
 
                     if (props.Headers == null)
                         props.Headers = new Dictionary<string, object>();

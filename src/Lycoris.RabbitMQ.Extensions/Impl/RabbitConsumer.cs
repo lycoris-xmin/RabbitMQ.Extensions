@@ -110,6 +110,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 options = new ConsumeQueueOption();
 
             var channel = GetChannel();
+
             PrepareQueueChannel(channel, queue, options);
 
             return ConsumeInternal(channel, queue, options.AutoAck, options.FetchCount, received);

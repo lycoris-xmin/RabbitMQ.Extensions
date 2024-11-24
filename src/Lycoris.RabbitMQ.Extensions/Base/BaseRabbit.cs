@@ -98,6 +98,7 @@ namespace Lycoris.RabbitMQ.Extensions.Base
                             .ToArray();
 
                         var amqpList = new List<AmqpTcpEndpoint>();
+
                         amqpList.AddRange(array.Select(f => new AmqpTcpEndpoint(f.Item1, f.Item2)));
 
                         var factory = new ConnectionFactory
@@ -115,7 +116,12 @@ namespace Lycoris.RabbitMQ.Extensions.Base
             {
                 throw new ConnectFailureException("connection lost", null);
             }
-            return connection.CreateModel();
+
+            var channel = connection.CreateModel();
+
+            channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+
+            return channel;
         }
 
         /// <summary>
