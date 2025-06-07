@@ -64,40 +64,15 @@ mqBuilder.AddRabbitProducer("DefaultProducer", opt =>
 
 // 使用生产者服务模式注册
 // 单实现模式
-mqBuilder.AddRabbitProducer<RabbitProducerService>(opt =>
+mqBuilder.AddRabbitProducer(opt =>
 {
     // 保留发布者数 默认：5
     opt.InitializeCount = 5;
     // 交换机名称
     opt.Exchange = "exchange.your.exchangename";
     // 交换机类型
-    opt.Type = RabbitExchangeType.Direct;
-    // 路由队列
-    opt.RouteQueues = new RouteQueue[]
-    {
-        new RouteQueue()
-        {
-            Route = "route.your.routename",
-            Queue = "queue.your.queuename"
-        },
-        new RouteQueue()
-        {
-            Route = "route.your.routename2",
-            Queue = "queue.your.queuename2"
-        }
-    };
-});
-
-// 接口、实现类模式
-mqBuilder.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>(opt =>
-{
-    // 保留发布者数 默认：5
-    opt.InitializeCount = 5;
-    // 交换机名称
-    opt.Exchange = "exchange.your.exchangename";
-    // 交换机类型 延迟队列
     opt.Type = RabbitExchangeType.Delayed;
-    // 延迟秒数
+    // 延迟队列，消息延迟发布秒数
     opt.DelayTime = 5;
     // 路由队列
     opt.RouteQueues = new RouteQueue[]
@@ -113,14 +88,45 @@ mqBuilder.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>(opt =
             Queue = "queue.your.queuename2"
         }
     };
-});
+
+    opt.AddRabbitProducer<RabbitProducerService>();
+})
+
+// 接口、实现类模式
+mqBuilder.AddRabbitProducer(opt =>
+{
+    // 保留发布者数 默认：5
+    opt.InitializeCount = 5;
+    // 交换机名称
+    opt.Exchange = "exchange.your.exchangename";
+    // 交换机类型
+    opt.Type = RabbitExchangeType.Delayed;
+    // 延迟队列，消息延迟发布秒数
+    opt.DelayTime = 5;
+    // 路由队列
+    opt.RouteQueues = new RouteQueue[]
+    {
+        new RouteQueue()
+        {
+            Route = "route.your.routename",
+            Queue = "queue.your.queuename"
+        },
+        new RouteQueue()
+        {
+            Route = "route.your.routename2",
+            Queue = "queue.your.queuename2"
+        }
+    };
+
+    opt.AddRabbitProducer<IRabbitProducerService, RabbitProducerService>();
+})
 ```
 
 **使用生产这服务模式注册时，不管是接口实现类还是单实现类均需要继承 `BaseRabbitProducerService` 基类，并实现构造函数**
 **服务生命周期固定为`Scoped`**
 
 **`BaseRabbitProducerService` 基类包含两个属性：**
-- **`RabbitProducerFactory`：生产者创建工厂**
+- **`IRabbitProducerFactory`：生产者创建工厂**
 - **`Producer`：当前注册的生产者实例**
 
 **示例**
@@ -161,10 +167,10 @@ mqBuilder.AddRabbitConsumer(opt =>
     // 消费者创建详见第二部分 创建消费者
     // 添加消费者监听
     // 普通模式
-    opt.AddListener<TestConsumer>("queue.your.queuename");
+    opt.AddConsumer<TestConsumer>("queue.your.queuename");
     // 订阅模式、路由模式、Topic模式、延迟队列模式
     // exchange.your.exchangename 为对应的生产者交换机
-    opt.AddListener<TestConsumer1>("exchange.your.exchangename", "queue.your.queuename");
+    opt.AddConsumer<TestConsumer1>("exchange.your.exchangename", "queue.your.queuename");
 });
 ```
 
@@ -182,12 +188,12 @@ public class Demo
         _consumerFactory = consumerFactory;
     }
 
-    public void PublishTest()
+    public async Task PublishTest()
     {
         // 获取生产者
         var producer = factory.Create("DefaultProducer");
         // 发送消息
-        producer.Publish("route.your.routename", "this is push TestConsumer");
+       await producer.PublishAsync("route.your.routename", "this is push TestConsumer");
     }
 }
 ```
@@ -203,11 +209,11 @@ public class RabbitProducerService : BaseRabbitProducerService, IRabbitProducerS
     /// <summary>
     /// 
     /// </summary>
-    public void Test()
+    public async Task Test()
     {
         // 直接使用生产者进行发送
-        this.Producer.Publish("route.your.routename", "this is push TestConsumer");
-        this.Producer.Publish("route.your.routename2", "this is push TestConsumer2");
+      await this.Producer.PublishAsync("route.your.routename", "this is push TestConsumer");
+      await this.Producer.PublishAsync("route.your.routename2", "this is push TestConsumer2");
     }
 }
 ```
@@ -216,7 +222,7 @@ public class RabbitProducerService : BaseRabbitProducerService, IRabbitProducerS
 ### **三、消费者使用示例**
 
 #### **消费者有两种创建方式**
-#### **1. 继承扩展封装好的基类：`BaseRabbitConsumerListener`，做了基础的异常捕捉。**
+#### **1. 继承扩展封装好的基类：`BaseRabbitConsumer`，做了基础的异常捕捉。**
 
 **基类包含属性：**
 - **`Context`：当前消费者接收到的上下文实体**
@@ -226,7 +232,7 @@ public class RabbitProducerService : BaseRabbitProducerService, IRabbitProducerS
 - **`Task<ReceivedHandler> HandleExceptionAsync(Exception exception)`：全局异常拦截，没有重写的情况下，默认扩展返回的是回滚MQ消息**
 
 ```csharp
-public class TestConsumer : BaseRabbitConsumerListener
+public class TestConsumer : BaseRabbitConsumer
 {
     /// <summary>
     /// 
