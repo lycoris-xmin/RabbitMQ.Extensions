@@ -84,7 +84,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <param name="configureName"></param>
         internal virtual void UseRabbitOption(string configureName)
         {
-            var rabbitOption = RabbitMQOptionsStore.GetRabbitMQOption(configureName) ?? throw new Exception($"cant not find the rabbitmq configuration with name:{configureName}");
+            var rabbitOption = RabbitMQOptionsStore.GetRabbitMQOption(configureName) ?? throw new Exception($"cant not found the rabbitmq configuration with name:{configureName}");
 
             Hosts = rabbitOption.Hosts;
             Port = rabbitOption.Port;

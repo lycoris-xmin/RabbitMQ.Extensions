@@ -7,7 +7,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// <summary>
     /// 
     /// </summary>
-    public sealed class RabbitConsumerHostedService : IHostedService
+    public sealed class DefaultRabbitConsumerHostedService : IHostedService
     {
         private readonly IRabbitConsumerFactory _consumerFactory;
 
@@ -15,7 +15,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// 
         /// </summary>
         /// <param name="consumerFactory"></param>
-        public RabbitConsumerHostedService(IRabbitConsumerFactory consumerFactory)
+        public DefaultRabbitConsumerHostedService(IRabbitConsumerFactory consumerFactory)
         {
             _consumerFactory = consumerFactory;
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder
 {
@@ -16,7 +17,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <param name="options"></param>
-        public static void AddOrUpdateRabbitMQOption(string configureName, RabbitOption options)
+        internal static void AddOrUpdateRabbitMQOption(string configureName, RabbitOption options)
             => _RabbitOptions.TryAdd(configureName, options);
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitOption GetRabbitMQOption(string configureName)
+        internal static RabbitOption GetRabbitMQOption(string configureName)
             => _RabbitOptions.ContainsKey(configureName) ? _RabbitOptions[configureName] : null;
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <param name="options"></param>
-        public static void AddOrUpdateRabbitProducerOptions(string configureName, RabbitProducerOption options)
+        internal static void AddOrUpdateRabbitProducerOptions(string configureName, RabbitProducerOption options)
         {
             if (options.Arguments == null)
                 options.Arguments = new Dictionary<string, object>();
@@ -76,7 +77,17 @@ namespace Lycoris.RabbitMQ.Extensions.Builder
         /// </summary>
         /// <param name="configureName"></param>
         /// <returns></returns>
-        public static RabbitProducerOption GetRabbitProducerOptions(string configureName)
+        internal static RabbitProducerOption GetRabbitProducerOptions(string configureName)
             => _RabbitProducerOptions.ContainsKey(configureName) ? _RabbitProducerOptions[configureName] : null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        internal static List<RabbitOption> GetAllRabbitMQOption()
+        {
+            var list = _RabbitOptions.Select(x => x.Value).ToList();
+            return list.GroupBy(x => new { x.Hosts, x.Port }).Select(x => x.First()).ToList() ?? new List<RabbitOption>();
+        }
     }
 }

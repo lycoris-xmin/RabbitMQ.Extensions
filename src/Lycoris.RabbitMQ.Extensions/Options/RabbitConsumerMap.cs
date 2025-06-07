@@ -1,9 +1,10 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using System;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Options
 {
-    internal class RabbitConsumerListenerMap
+    internal class RabbitConsumerMap
     {
         /// <summary>
         /// 
@@ -23,6 +24,16 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <summary>
         /// 
         /// </summary>
-        public Action<RecieveResult> MessageRecieved { get; set; } = null;
+        public Func<RecieveResult, Task> MessageRecieved { get; set; } = null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool KeyConsumer { get; set; } = false;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string KeyName { get; set; }
     }
 }

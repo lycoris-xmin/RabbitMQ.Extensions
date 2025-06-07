@@ -12,7 +12,7 @@ namespace Lycoris.RabbitMQ.Extensions
     /// <summary>
     /// 
     /// </summary>
-    public static class RabbitMQBuilderExtension
+    public static class RabbitMqBuilderExtension
     {
         /// <summary>
         /// 注册RabbitMQ扩展
@@ -20,13 +20,14 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitMQExtensions(this IServiceCollection services, Action<RabbitMQBuilder> configure)
+        public static RabbitMqBuilder AddRabbitMQExtensions(this IServiceCollection services, Action<RabbitMqBuilder> configure)
         {
-            // 生产者工厂
+            // 消费者工厂
             services.TryAddSingleton<IRabbitConsumerFactory, RabbitConsumerFactory>();
 
             // 配置构建
-            var builder = new RabbitMQBuilder(services);
+            var builder = new RabbitMqBuilder(services);
+
             configure.Invoke(builder);
 
             // 检查基础配置
@@ -46,6 +47,8 @@ namespace Lycoris.RabbitMQ.Extensions
                 BasicProps = builder.BasicProps
             });
 
+            builder.services.TryAddTransient<IRabbitMqEventHandler, DefaultRabbitMqEventHandler>();
+
             return builder;
         }
 
@@ -56,7 +59,7 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <param name="configName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitProducer(this RabbitMQBuilder builder, string configName, Action<RabbitProducerOption> configure)
+        public static RabbitMqBuilder AddRabbitProducer(this RabbitMqBuilder builder, string configName, Action<RabbitProducerOption> configure)
         {
             var option = new RabbitProducerOption();
 
@@ -68,6 +71,12 @@ namespace Lycoris.RabbitMQ.Extensions
 
             // 验证延迟队列配置
             option.CheckDelayProps();
+
+            foreach (var item in option.RouteQueues)
+            {
+                item.Options.Durable = option.Durable;
+                item.Options.AutoDelete = option.AutoDelete;
+            }
 
             RabbitMQOptionsStore.AddOrUpdateRabbitProducerOptions(configName, option);
 
@@ -83,7 +92,7 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <param name="builder"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitProducer(this RabbitMQBuilder builder, Action<RabbitProducerOption> configure)
+        public static RabbitMqBuilder AddRabbitProducer(this RabbitMqBuilder builder, Action<RabbitProducerOption> configure)
         {
             var option = new RabbitProducerOption();
 
@@ -95,6 +104,12 @@ namespace Lycoris.RabbitMQ.Extensions
 
             // 验证延迟队列配置
             option.CheckDelayProps();
+
+            foreach (var item in option.RouteQueues)
+            {
+                item.Options.Durable = option.Durable;
+                item.Options.AutoDelete = option.AutoDelete;
+            }
 
             foreach (var item in option.RabbitProducer)
             {
@@ -117,7 +132,7 @@ namespace Lycoris.RabbitMQ.Extensions
         /// <param name="builder"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static RabbitMQBuilder AddRabbitConsumer(this RabbitMQBuilder builder, Action<RabbitConsumerOption> configure)
+        public static RabbitMqBuilder AddRabbitConsumer(this RabbitMqBuilder builder, Action<RabbitConsumerOption> configure)
         {
             var option = new RabbitConsumerOption();
 
@@ -125,11 +140,17 @@ namespace Lycoris.RabbitMQ.Extensions
 
             configure.Invoke(option);
 
+            foreach (var item in option.RouteQueues)
+            {
+                item.Options.Durable = option.Durable;
+                item.Options.AutoDelete = option.AutoDelete;
+            }
+
             var consoumerBuilder = new DafaultRabbitConsumerBuilder(builder.services, option);
 
-            if (option.ListenerMaps.Count > 0)
+            if (option.ConsumerMaps.Count > 0)
             {
-                foreach (var item in option.ListenerMaps)
+                foreach (var item in option.ConsumerMaps)
                 {
                     if (!option.RouteQueues.Any(x => x.Queue == item.Queue))
                         throw new Exception($"consumer binding queue:{item.Queue} does not exist in the route queues collection");
@@ -137,25 +158,45 @@ namespace Lycoris.RabbitMQ.Extensions
                     if (item.Listener == null && item.MessageRecieved == null)
                         continue;
 
-                    if (string.IsNullOrEmpty(item.Exchange))
+                    if (item.Listener != null)
                     {
-                        if (item.Listener != null)
-                            consoumerBuilder.AddListener(item.Queue, item.Listener);
+                        if (string.IsNullOrEmpty(item.Exchange))
+                        {
+                            if (item.KeyConsumer)
+                            {
+                                if (string.IsNullOrEmpty(item.KeyName))
+                                    consoumerBuilder.AddDefaultKeyConsumer(item.Queue, item.Listener);
+                                else
+                                    consoumerBuilder.AddKeyConsumer(item.Queue, item.Listener, item.KeyName);
+                            }
+                            else
+                                consoumerBuilder.AddConsumer(item.Queue, item.Listener);
+                        }
                         else
-                            consoumerBuilder.AddListener(item.Queue, item.MessageRecieved);
+                        {
+                            if (item.KeyConsumer)
+                            {
+                                if (string.IsNullOrEmpty(item.KeyName))
+                                    consoumerBuilder.AddDefaultKeyConsumer(item.Exchange, item.Queue, item.Listener);
+                                else
+                                    consoumerBuilder.AddKeyConsumer(item.Exchange, item.Queue, item.Listener, item.KeyName);
+                            }
+                            else
+                                consoumerBuilder.AddConsumer(item.Exchange, item.Queue, item.Listener);
+                        }
                     }
                     else
                     {
-                        if (item.Listener != null)
-                            consoumerBuilder.AddListener(item.Exchange, item.Queue, item.Listener);
+                        if (string.IsNullOrEmpty(item.Exchange))
+                            consoumerBuilder.AddConsumer(item.Queue, item.MessageRecieved);
                         else
-                            consoumerBuilder.AddListener(item.Exchange, item.Queue, item.MessageRecieved);
+                            consoumerBuilder.AddConsumer(item.Exchange, item.Queue, item.MessageRecieved);
                     }
                 }
             }
 
-            if (!builder.DisableRabbitConsumerHostedListen && !builder.services.Any(f => f.ImplementationType == typeof(RabbitConsumerHostedService)))
-                builder.services.AddHostedService<RabbitConsumerHostedService>();
+            if (!builder.DisableRabbitConsumerHostedListen && !builder.services.Any(f => f.ImplementationType == typeof(DefaultRabbitConsumerHostedService)))
+                builder.services.AddHostedService<DefaultRabbitConsumerHostedService>();
 
             return builder;
         }

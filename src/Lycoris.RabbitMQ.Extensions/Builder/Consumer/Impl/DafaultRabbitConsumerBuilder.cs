@@ -1,6 +1,7 @@
 ﻿using Lycoris.RabbitMQ.Extensions.DataModel;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
 {
@@ -37,18 +38,18 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <param name="onMessageRecieved"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public IRabbitConsumerBuilder AddListener(string queue, Action<IServiceProvider, RecieveResult> onMessageRecieved)
+        public IRabbitConsumerBuilder AddConsumer(string queue, Func<IServiceProvider, RecieveResult, Task> onMessageRecieved)
         {
             if (string.IsNullOrEmpty(queue))
                 throw new ArgumentException("queue cann't be empty", nameof(queue));
 
             Services.AddSingleton<IRabbitConsumerProvider>(serviceProvider =>
             {
-                return new DefaultRabbitConsumerProvider(queue, _rabbitConsumerOptions, result =>
+                return new DefaultRabbitConsumerProvider(serviceProvider, queue, _rabbitConsumerOptions, async result =>
                 {
                     using (var scope = serviceProvider.CreateScope())
                     {
-                        onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                        await onMessageRecieved?.Invoke(scope.ServiceProvider, result);
                     }
                 });
             });
@@ -63,7 +64,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         /// <param name="queue"></param>
         /// <param name="onMessageRecieved"></param>
         /// <returns></returns>
-        public IRabbitConsumerBuilder AddListener(string exchange, string queue, Action<IServiceProvider, RecieveResult> onMessageRecieved)
+        public IRabbitConsumerBuilder AddConsumer(string exchange, string queue, Func<IServiceProvider, RecieveResult, Task> onMessageRecieved)
         {
             if (string.IsNullOrEmpty(exchange))
                 throw new ArgumentException("exchange cann't be empty", nameof(exchange));
@@ -73,11 +74,11 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
 
             Services.AddSingleton<IRabbitConsumerProvider>(serviceProvider =>
             {
-                return new DefaultRabbitConsumerProvider(exchange, queue, _rabbitConsumerOptions, result =>
+                return new DefaultRabbitConsumerProvider(serviceProvider, exchange, queue, _rabbitConsumerOptions, async result =>
                 {
                     using (var scope = serviceProvider.CreateScope())
                     {
-                        onMessageRecieved?.Invoke(scope.ServiceProvider, result);
+                        await onMessageRecieved?.Invoke(scope.ServiceProvider, result);
                     }
                 });
             });

@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
 {
@@ -16,8 +17,9 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="provider"></param>
         /// <param name="hostAndPorts"></param>
-        public RabbitConsumer(params string[] hostAndPorts) : base(hostAndPorts)
+        public RabbitConsumer(IServiceProvider provider, params string[] hostAndPorts) : base(provider, hostAndPorts)
         {
 
         }
@@ -31,16 +33,16 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="fetchCount"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        private static ListenResult ConsumeInternal(IModel channel, string queue, bool autoAck, ushort? fetchCount, Action<RecieveResult> received)
+        private static async Task<ListenResult> ConsumeInternalAsync(IChannel channel, string queue, bool autoAck, ushort? fetchCount, Func<RecieveResult, Task> received)
         {
             if (fetchCount != null)
-                channel.BasicQos(0, fetchCount.Value, true);
+                await channel.BasicQosAsync(0, fetchCount.Value, true);
 
-            var consumer = new EventingBasicConsumer(channel);
+            var consumer = new AsyncEventingBasicConsumer(channel);
 
             if (received != null)
             {
-                consumer.Received += (sender, e) =>
+                consumer.ReceivedAsync += async (sender, e) =>
                 {
                     var cancellationTokenSource = new CancellationTokenSource();
                     using (var result = new RecieveResult(e, cancellationTokenSource))
@@ -48,7 +50,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
                         if (!autoAck)
                         {
-                            cancellationTokenSource.Token.Register(r =>
+                            cancellationTokenSource.Token.Register(async r =>
                             {
                                 if (r == null)
                                     throw new ArgumentNullException(nameof(r));
@@ -56,9 +58,9 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                                 if (r is RecieveResult recieveResult)
                                 {
                                     if (recieveResult.IsCommit)
-                                        channel.BasicAck(e.DeliveryTag, false);
+                                        await channel.BasicAckAsync(e.DeliveryTag, false);
                                     else
-                                        channel.BasicNack(e.DeliveryTag, false, recieveResult.Requeue);
+                                        await channel.BasicNackAsync(e.DeliveryTag, false, recieveResult.Requeue);
                                 }
                                 else
                                     throw new ArgumentNullException(nameof(recieveResult));
@@ -68,7 +70,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
                         try
                         {
-                            received.Invoke(result);
+                            await received.Invoke(result);
                         }
                         catch
                         {
@@ -78,21 +80,23 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                             }
                         }
                     }
-
                 };
             }
 
-            channel.BasicConsume(queue, autoAck, consumer);
+            await channel.BasicConsumeAsync(queue, autoAck, consumer);
+
             var listenResult = new ListenResult();
-            listenResult.Token.Register(() =>
+
+            listenResult.Token.Register(async () =>
             {
                 try
                 {
-                    channel.Close();
-                    channel.Dispose();
+                    await channel.CloseAsync();
+                    await channel.DisposeAsync();
                 }
                 catch { }
             });
+
             return listenResult;
         }
 
@@ -104,16 +108,16 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, ConsumeQueueOption options = null, Action<RecieveResult> received = null)
+        public async Task<ListenResult> ListenAsync(string queue, ConsumeQueueOption options = null, Func<RecieveResult, Task> received = null)
         {
             if (options == null)
                 options = new ConsumeQueueOption();
 
-            var channel = GetChannel();
+            var channel = await GetChannelAsync();
 
-            PrepareQueueChannel(channel, queue, options);
+            await PrepareQueueChannelAsync(channel, queue, options);
 
-            return ConsumeInternal(channel, queue, options.AutoAck, options.FetchCount, received);
+            return await ConsumeInternalAsync(channel, queue, options.AutoAck, options.FetchCount, received);
         }
 
         /// <summary>
@@ -123,11 +127,13 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string queue, Action<ConsumeQueueOption> configure, Action<RecieveResult> received = null)
+        public Task<ListenResult> ListenAsync(string queue, Action<ConsumeQueueOption> configure, Func<RecieveResult, Task> received = null)
         {
             var options = new ConsumeQueueOption();
+
             configure?.Invoke(options);
-            return Listen(queue, options, received);
+
+            return ListenAsync(queue, options, received);
         }
         #endregion
 
@@ -140,7 +146,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="options"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, ExchangeConsumeQueueOption options = null, Action<RecieveResult> received = null)
+        public async Task<ListenResult> ListenAsync(string exchange, string queue, ExchangeConsumeQueueOption options = null, Func<RecieveResult, Task> received = null)
         {
             if (string.IsNullOrEmpty(exchange))
                 throw new ArgumentException("exchange cannot be empty", nameof(exchange));
@@ -154,11 +160,11 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             if (options == null)
                 options = new ExchangeConsumeQueueOption();
 
-            var channel = GetChannel();
+            var channel = await GetChannelAsync();
 
-            PrepareExchangeChannel(channel, exchange, options);
+            await PrepareExchangeChannelAsync(channel, exchange, options);
 
-            return ConsumeInternal(channel, queue, options.AutoAck, options.FetchCount, received);
+            return await ConsumeInternalAsync(channel, queue, options.AutoAck, options.FetchCount, received);
         }
         /// <summary>
         /// 消费消息
@@ -168,28 +174,32 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="configure"></param>
         /// <param name="received"></param>
         /// <returns></returns>
-        public ListenResult Listen(string exchange, string queue, Action<ExchangeConsumeQueueOption> configure, Action<RecieveResult> received = null)
+        public Task<ListenResult> ListenAsync(string exchange, string queue, Action<ExchangeConsumeQueueOption> configure, Func<RecieveResult, Task> received = null)
         {
             var options = new ExchangeConsumeQueueOption();
+
             configure?.Invoke(options);
-            return Listen(exchange, queue, options, received);
+
+            return ListenAsync(exchange, queue, options, received);
         }
         #endregion
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="rabbitBaseOptions"></param>
         /// <returns></returns>
-        public static RabbitConsumer Create(RabbitConsumerOption rabbitBaseOptions)
+        public static RabbitConsumer Create(IServiceProvider serviceProvider, RabbitConsumerOption rabbitBaseOptions)
         {
-            var consumer = new RabbitConsumer(rabbitBaseOptions.Hosts)
+            var consumer = new RabbitConsumer(serviceProvider, rabbitBaseOptions.Hosts)
             {
                 Password = rabbitBaseOptions.Password,
                 Port = rabbitBaseOptions.Port,
                 UserName = rabbitBaseOptions.UserName,
                 VirtualHost = rabbitBaseOptions.VirtualHost
             };
+
             return consumer;
         }
     }

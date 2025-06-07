@@ -1,4 +1,5 @@
 ﻿using Lycoris.RabbitMQ.Extensions;
+using System.Threading.Tasks;
 
 namespace RabbitMQSample
 {
@@ -11,10 +12,10 @@ namespace RabbitMQSample
         /// <summary>
         /// 
         /// </summary>
-        public void Test()
+        public async Task Test()
         {
-            this.Producer.Publish("route.your.routename", "this is push TestConsumer");
-            this.Producer.Publish("route.your.routename2", "this is push TestConsumer2");
+            await this.Producer.PublishAsync("route.your.routename", "this is push TestConsumer");
+            await this.Producer.PublishAsync("route.your.routename2", "this is push TestConsumer2");
         }
     }
 }

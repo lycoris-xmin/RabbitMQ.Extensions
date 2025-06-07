@@ -1,6 +1,7 @@
 ﻿using Lycoris.RabbitMQ.Extensions.Base;
 using Lycoris.RabbitMQ.Extensions.Options;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
 {
@@ -25,13 +26,12 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         protected override int InitializeCount => _rabbitProducerOptions.InitializeCount;
 
-
         /// <summary>
         /// 普通的往队列发送消息
         /// 普通模式、Work模式
         /// </summary>
         /// <param name="messages"></param>
-        public void Publish(string messages)
+        public async Task PublishAsync(string messages)
         {
             var producer = RentProducer();
 
@@ -39,7 +39,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 if (!string.IsNullOrEmpty(queue))
                 {
-                    producer.Publish(queue, messages, new QueueOption()
+                    await producer.PublishAsync(queue, messages, new QueueOption()
                     {
                         Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                         AutoDelete = _rabbitProducerOptions.AutoDelete,
@@ -56,7 +56,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// 普通模式、Work模式
         /// </summary>
         /// <param name="messages"></param>
-        public void Publish(string[] messages)
+        public async Task PublishAsync(string[] messages)
         {
             var producer = RentProducer();
 
@@ -64,7 +64,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             {
                 if (!string.IsNullOrEmpty(queue))
                 {
-                    producer.Publish(queue, messages, new QueueOption()
+                    await producer.PublishAsync(queue, messages, new QueueOption()
                     {
                         Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                         AutoDelete = _rabbitProducerOptions.AutoDelete,
@@ -75,7 +75,6 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
             ReturnProducer(producer);
         }
-
 
         /// <summary>
         /// 使用交换机发送消息
@@ -83,11 +82,11 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         /// <param name="routingKey"></param>
         /// <param name="messages"></param>
-        public void Publish(string routingKey, string messages)
+        public async Task PublishAsync(string routingKey, string messages)
         {
             var producer = RentProducer();
 
-            producer.Publish(_rabbitProducerOptions.Exchange, routingKey, messages, new ExchangeQueueOptions()
+            await producer.PublishAsync(_rabbitProducerOptions.Exchange, routingKey, messages, new ExchangeQueueOptions()
             {
                 Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                 AutoDelete = _rabbitProducerOptions.AutoDelete,
@@ -106,11 +105,11 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// </summary>
         /// <param name="routingKey"></param>
         /// <param name="messages"></param>
-        public void Publish(string routingKey, string[] messages)
+        public async Task PublishAsync(string routingKey, string[] messages)
         {
             var producer = RentProducer();
 
-            producer.Publish(_rabbitProducerOptions.Exchange, routingKey, messages, new ExchangeQueueOptions()
+            await producer.PublishAsync(_rabbitProducerOptions.Exchange, routingKey, messages, new ExchangeQueueOptions()
             {
                 Arguments = _rabbitProducerOptions.Arguments ?? new Dictionary<string, object>(),
                 AutoDelete = _rabbitProducerOptions.AutoDelete,

@@ -14,41 +14,43 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
         private readonly Options.RabbitConsumerOption _rabbitConsumerOptions;
         private ListenResult listenResult;
         private bool disposed = false;
-        private readonly Action<RecieveResult> action;
+        private readonly Func<RecieveResult, Task> recieved;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="queue">队列名称</param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="queue"></param>
         /// <param name="rabbitConsumerOptions"></param>
-        /// <param name="action"></param>
-        public DefaultRabbitConsumerProvider(string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Action<RecieveResult> action)
+        /// <param name="recieved"></param>
+        public DefaultRabbitConsumerProvider(IServiceProvider serviceProvider, string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Func<RecieveResult, Task> recieved)
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 
             this.Exchange = string.Empty;
             this.Queue = queue;
-            this.action = action;
+            this.recieved = recieved;
 
-            Consumer = RabbitConsumer.Create(rabbitConsumerOptions);
+            Consumer = RabbitConsumer.Create(serviceProvider, rabbitConsumerOptions);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="exchange">交换机名称</param>
-        /// <param name="queue">队列名称</param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="exchange"></param>
+        /// <param name="queue"></param>
         /// <param name="rabbitConsumerOptions"></param>
-        /// <param name="action"></param>
-        public DefaultRabbitConsumerProvider(string exchange, string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Action<RecieveResult> action)
+        /// <param name="recieved"></param>
+        public DefaultRabbitConsumerProvider(IServiceProvider serviceProvider, string exchange, string queue, Options.RabbitConsumerOption rabbitConsumerOptions, Func<RecieveResult, Task> recieved)
         {
             _rabbitConsumerOptions = rabbitConsumerOptions;
 
             this.Exchange = exchange;
             this.Queue = queue;
-            this.action = action;
+            this.recieved = recieved;
 
-            Consumer = RabbitConsumer.Create(rabbitConsumerOptions);
+            Consumer = RabbitConsumer.Create(serviceProvider, rabbitConsumerOptions);
         }
 
         /// <summary>
@@ -92,18 +94,18 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
             {
                 if (string.IsNullOrEmpty(this.Exchange))
                 {
-                    listenResult = Consumer.Listen(this.Queue, options =>
+                    listenResult = await Consumer.ListenAsync(this.Queue, options =>
                     {
                         options.AutoDelete = _rabbitConsumerOptions.AutoDelete;
                         options.Durable = _rabbitConsumerOptions.Durable;
                         options.AutoAck = _rabbitConsumerOptions.AutoAck;
                         options.Arguments = _rabbitConsumerOptions.Arguments ?? new Dictionary<string, object>();
                         options.FetchCount = _rabbitConsumerOptions.FetchCount;
-                    }, action);
+                    }, recieved);
                 }
                 else
                 {
-                    listenResult = Consumer.Listen(this.Exchange, this.Queue, options =>
+                    listenResult = await Consumer.ListenAsync(this.Exchange, this.Queue, options =>
                     {
                         options.AutoDelete = _rabbitConsumerOptions.AutoDelete;
                         options.Durable = _rabbitConsumerOptions.Durable;
@@ -112,7 +114,7 @@ namespace Lycoris.RabbitMQ.Extensions.Builder.Consumer.Impl
                         options.FetchCount = _rabbitConsumerOptions.FetchCount;
                         options.Type = _rabbitConsumerOptions.Type;
                         options.RouteQueues = _rabbitConsumerOptions.RouteQueues;
-                    }, action);
+                    }, recieved);
                 }
             }
 

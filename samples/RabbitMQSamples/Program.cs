@@ -1,7 +1,10 @@
 using Lycoris.RabbitMQ.Extensions;
 using Lycoris.RabbitMQ.Extensions.Options;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQSample;
+using System;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,8 +78,8 @@ mqBuilder.AddRabbitProducer(opt =>
         }
     };
 
-    opt.AddListener<TestConsumer>("exchange.your.exchangename", "queue.your.queuename");
-    opt.AddListener<TestConsumer2>("exchange.your.exchangename", "queue.your.queuename2");
+    opt.AddConsumer<TestConsumer>("exchange.your.exchangename", "queue.your.queuename");
+    opt.AddConsumer<TestConsumer2>("exchange.your.exchangename", "queue.your.queuename2");
 });
 
 var app = builder.Build();

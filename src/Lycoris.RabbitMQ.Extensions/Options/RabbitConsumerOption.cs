@@ -3,6 +3,7 @@ using Lycoris.RabbitMQ.Extensions.DataModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Options
 {
@@ -52,7 +53,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="queue"></param>
-        public void AddListener<T>(string queue) where T : class, IRabbitConsumerListener => AddListener<T>("", queue);
+        public void AddConsumer<T>(string queue) where T : class, IRabbitConsumerListener => AddConsumer<T>("", queue);
 
         /// <summary>
         /// 
@@ -60,9 +61,9 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <typeparam name="T"></typeparam>
         /// <param name="exchange"></param>
         /// <param name="queue"></param>
-        public void AddListener<T>(string exchange, string queue) where T : class, IRabbitConsumerListener
+        public void AddConsumer<T>(string exchange, string queue) where T : class, IRabbitConsumerListener
         {
-            ListenerMaps.Add(new RabbitConsumerListenerMap()
+            ConsumerMaps.Add(new RabbitConsumerMap()
             {
                 Exchange = exchange,
                 Queue = queue,
@@ -73,9 +74,60 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <summary>
         /// 
         /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="keyName"></param>
+        /// <param name="queue"></param>
+        public void AddKeyConsumer<T>(string keyName, string queue) where T : class, IRabbitConsumerListener => AddKeyConsumer<T>(keyName, "", queue);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="keyName"></param>
+        /// <param name="exchange"></param>
+        /// <param name="queue"></param>
+        public void AddKeyConsumer<T>(string keyName, string exchange, string queue) where T : class, IRabbitConsumerListener
+        {
+            ConsumerMaps.Add(new RabbitConsumerMap()
+            {
+                Exchange = exchange,
+                Queue = queue,
+                Listener = typeof(T),
+                KeyConsumer = true,
+                KeyName = keyName
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="queue"></param>
+        public void AddDefaultKeyConsumer<T>(string queue) where T : class, IRabbitConsumerListener => AddDefaultKeyConsumer<T>("", queue);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="exchange"></param>
+        /// <param name="queue"></param>
+        public void AddDefaultKeyConsumer<T>(string exchange, string queue) where T : class, IRabbitConsumerListener
+        {
+            ConsumerMaps.Add(new RabbitConsumerMap()
+            {
+                Exchange = exchange,
+                Queue = queue,
+                Listener = typeof(T),
+                KeyConsumer = true
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="queue"></param>
         /// <param name="onMessageRecieved"></param>
-        public void AddListener(string queue, Action<RecieveResult> onMessageRecieved) => AddListener("", queue, onMessageRecieved);
+        public void AddConsumer(string queue, Func<RecieveResult, Task> onMessageRecieved) => AddConsumer("", queue, onMessageRecieved);
 
         /// <summary>
         /// 
@@ -83,9 +135,9 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <param name="exchange"></param>
         /// <param name="queue"></param>
         /// <param name="onMessageRecieved"></param>
-        public void AddListener(string exchange, string queue, Action<RecieveResult> onMessageRecieved)
+        public void AddConsumer(string exchange, string queue, Func<RecieveResult, Task> onMessageRecieved)
         {
-            ListenerMaps.Add(new RabbitConsumerListenerMap()
+            ConsumerMaps.Add(new RabbitConsumerMap()
             {
                 Exchange = exchange,
                 Queue = queue,
@@ -93,7 +145,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
             });
         }
 
-        internal List<RabbitConsumerListenerMap> ListenerMaps { get; set; } = new List<RabbitConsumerListenerMap>();
+        internal List<RabbitConsumerMap> ConsumerMaps { get; set; } = new List<RabbitConsumerMap>();
 
         /// <summary>
         /// 使用基础配置

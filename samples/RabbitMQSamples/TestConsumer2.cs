@@ -1,9 +1,11 @@
 ﻿using Lycoris.RabbitMQ.Extensions;
 using Lycoris.RabbitMQ.Extensions.DataModel;
+using System;
+using System.Threading.Tasks;
 
 namespace RabbitMQSample
 {
-    public class TestConsumer2 : BaseRabbitConsumerListener
+    public class TestConsumer2 : BaseRabbitConsumer
     {
         /// <summary>
         /// 

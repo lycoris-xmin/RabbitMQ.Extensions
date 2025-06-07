@@ -7,17 +7,22 @@ namespace Lycoris.RabbitMQ.Extensions
     /// <summary>
     /// 
     /// </summary>
-    public abstract class BaseRabbitConsumerListener : IRabbitConsumerListener
+    public abstract class BaseRabbitConsumer : IRabbitConsumerListener
     {
         /// <summary>
         /// 交换机
         /// </summary>
-        protected string Exchange { get; private set; } = string.Empty;
+        protected string Exchange => this.Context.Exchange ?? "";
 
         /// <summary>
         /// 路由
         /// </summary>
-        protected string Route { get; private set; } = string.Empty;
+        protected string Queue => this.Context.Queue ?? "";
+
+        /// <summary>
+        /// 路由
+        /// </summary>
+        protected string Route => this.Context.Route ?? "";
 
         /// <summary>
         /// 消费上下文
@@ -30,15 +35,13 @@ namespace Lycoris.RabbitMQ.Extensions
         protected int ResubmitTimeSpan { get; set; } = 1000;
 
         /// <summary>
-        /// 
+        /// 消费消息
         /// </summary>
         /// <param name="recieveResult"></param>
         /// <returns></returns>
         public async Task ConsumeAsync(RecieveResult recieveResult)
         {
-            Context = recieveResult;
-            Exchange = recieveResult.Exchange ?? "";
-            Route = recieveResult.RoutingKey ?? "";
+            this.Context = recieveResult;
 
             ReceivedHandler handlerResult;
 
@@ -62,22 +65,22 @@ namespace Lycoris.RabbitMQ.Extensions
             else
             {
                 //延迟发布
-                if (ResubmitTimeSpan > 0)
-                    await Task.Delay(ResubmitTimeSpan);
+                if (this.ResubmitTimeSpan > 0)
+                    await Task.Delay(this.ResubmitTimeSpan);
 
                 recieveResult.RollBack(true);
             }
         }
 
         /// <summary>
-        /// 
+        /// 消费消息
         /// </summary>
         /// <param name="body"></param>
         /// <returns><see cref="ReceivedHandler"/>处理结果</returns>
         protected abstract Task<ReceivedHandler> ReceivedAsync(string body);
 
         /// <summary>
-        /// 
+        /// 消费消息
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>

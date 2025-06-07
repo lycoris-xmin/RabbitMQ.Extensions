@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 namespace Lycoris.RabbitMQ.Extensions.Options
 {
     /// <summary>
@@ -9,10 +10,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <summary>
         /// 
         /// </summary>
-        public RouteQueue()
-        {
-            Options = new QueueOption();
-        }
+        public RouteQueue() => Options = new QueueOption();
 
         /// <summary>
         /// 路由
@@ -27,7 +25,7 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         /// <summary>
         /// 队列选项
         /// </summary>
-        public QueueOption Options { get; set; }
+        internal QueueOption Options { get; set; }
 
         /// <summary>
         /// 参数

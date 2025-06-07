@@ -21,11 +21,11 @@ namespace Lycoris.RabbitMQ.Extensions.DataModel
         {
             this.MessageId = arg.BasicProperties.MessageId;
             this.Body = Encoding.UTF8.GetString(arg.Body.ToArray());
-            this.ConsumerTag = arg.ConsumerTag;
-            this.DeliveryTag = arg.DeliveryTag;
             this.Exchange = arg.Exchange;
+            this.Route = arg.RoutingKey;
             this.Redelivered = arg.Redelivered;
-            this.RoutingKey = arg.RoutingKey;
+            this.DeliveryTag = arg.DeliveryTag;
+            this.ConsumerTag = arg.ConsumerTag;
             this.cancellationTokenSource = cancellationTokenSource;
         }
 
@@ -40,6 +40,21 @@ namespace Lycoris.RabbitMQ.Extensions.DataModel
         public string Body { get; private set; }
 
         /// <summary>
+        /// 交换机
+        /// </summary>
+        public string Exchange { get; private set; }
+
+        /// <summary>
+        /// 路由
+        /// </summary>
+        public string Route { get; private set; }
+
+        /// <summary>
+        /// 路由
+        /// </summary>
+        public string Queue { get; internal set; }
+
+        /// <summary>
         /// 消费者标签
         /// </summary>
         public string ConsumerTag { get; private set; }
@@ -50,19 +65,9 @@ namespace Lycoris.RabbitMQ.Extensions.DataModel
         public ulong DeliveryTag { get; private set; }
 
         /// <summary>
-        /// 交换机
-        /// </summary>
-        public string Exchange { get; private set; }
-
-        /// <summary>
         /// 是否Ack
         /// </summary>
         public bool Redelivered { get; private set; }
-
-        /// <summary>
-        /// 路由
-        /// </summary>
-        public string RoutingKey { get; private set; }
 
         /// <summary>
         /// 是否提交

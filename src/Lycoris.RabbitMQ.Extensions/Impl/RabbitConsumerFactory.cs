@@ -23,7 +23,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         public RabbitConsumerFactory(ILoggerFactory factory, IEnumerable<IRabbitConsumerProvider> rabbitConsumerProviders)
         {
             _rabbitConsumerProviders = rabbitConsumerProviders;
-            _logger = factory != null ? new RabbitMqLogger(factory.CreateLogger<RabbitConsumerHostedService>()) : null;
+            _logger = factory != null ? new RabbitMqLogger(factory.CreateLogger<DefaultRabbitConsumerHostedService>()) : null;
         }
 
         /// <summary>

@@ -18,6 +18,11 @@ namespace Lycoris.RabbitMQ.Extensions.Options
         public int Port { get; set; } = 5672;
 
         /// <summary>
+        /// Api端口
+        /// </summary>
+        public int ApiPort { get; set; } = 15672;
+
+        /// <summary>
         /// 账号
         /// </summary>
         public string UserName { get; set; } = string.Empty;

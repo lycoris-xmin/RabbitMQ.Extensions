@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Lycoris.RabbitMQ.Extensions.Impl
 {
@@ -14,13 +15,15 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// </summary>
     public sealed class RabbitProducer : BaseRabbit
     {
+        //private readonly ConcurrentDictionary<ulong, TaskCompletionSource<bool>> _pendingConfirms;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="hostAndPorts"></param>
         public RabbitProducer(params string[] hostAndPorts) : base(hostAndPorts)
         {
-
+            //_pendingConfirms = new ConcurrentDictionary<ulong, TaskCompletionSource<bool>>();
         }
 
         #region 普通模式、Work模式
@@ -30,8 +33,8 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="message"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string message, QueueOption options = null)
-            => Publish(queue, new string[] { message }, options);
+        public Task PublishAsync(string queue, string message, QueueOption options = null)
+            => PublishAsync(queue, new string[] { message }, options);
 
         /// <summary>
         /// 发布消息
@@ -39,7 +42,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="queue"></param>
         /// <param name="messages"></param>
         /// <param name="options"></param>
-        public void Publish(string queue, string[] messages, QueueOption options = null)
+        public async Task PublishAsync(string queue, string[] messages, QueueOption options = null)
         {
             if (string.IsNullOrEmpty(queue))
                 throw new ArgumentException("queue cannot be empty", nameof(queue));
@@ -47,16 +50,35 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             if (options == null)
                 options = new QueueOption();
 
-            var channel = GetChannel();
+            var channel = await GetChannelAsync();
 
-            PrepareQueueChannel(channel, queue, options);
+            //var nextPublishSeqNo = await channel.GetNextPublishSequenceNumberAsync();
+
+            //var tcs = new TaskCompletionSource<bool>();
+
+            //_pendingConfirms[nextPublishSeqNo] = tcs;
+
+            //channel.BasicAcksAsync += Channel_BasicAcksAsync;
+
+            //channel.BasicNacksAsync += Channel_BasicNacksAsync;
+
+            await PrepareQueueChannelAsync(channel, queue, options);
 
             foreach (var message in messages)
             {
                 var buffer = Encoding.UTF8.GetBytes(message);
-                channel.BasicPublish("", queue, null, buffer);
+
+                await channel.BasicPublishAsync("", queue, false, new BasicProperties(), buffer);
+
+                //// 这里异步等待消息确认
+                //var confirmed = tcs.Task.Wait(5000);
+                //if (!confirmed)
+                //{
+
+                //}
             }
-            channel.Close();
+
+            await channel.CloseAsync();
         }
         #endregion
 
@@ -68,8 +90,8 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="routingKey"></param>
         /// <param name="message"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, string routingKey, string message, ExchangeQueueOptions options = null)
-            => Publish(exchange, new RouteMessage() { Message = message, RoutingKey = routingKey }, options);
+        public Task PublishAsync(string exchange, string routingKey, string message, ExchangeQueueOptions options = null)
+            => PublishAsync(exchange, new RouteMessage() { Message = message, RoutingKey = routingKey }, options);
 
         /// <summary>
         /// 发布消息
@@ -78,8 +100,8 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="routingKey"></param>
         /// <param name="messages"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, string routingKey, string[] messages, ExchangeQueueOptions options = null)
-            => Publish(exchange, messages.Select(message => new RouteMessage() { Message = message, RoutingKey = routingKey }).ToArray(), options);
+        public Task PublishAsync(string exchange, string routingKey, string[] messages, ExchangeQueueOptions options = null)
+            => PublishAsync(exchange, messages.Select(message => new RouteMessage() { Message = message, RoutingKey = routingKey }).ToArray(), options);
 
         /// <summary>
         /// 发布消息
@@ -87,8 +109,8 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="exchange"></param>
         /// <param name="routeMessage"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, RouteMessage routeMessage, ExchangeQueueOptions options = null)
-            => Publish(exchange, new RouteMessage[] { routeMessage }, options);
+        public Task PublishAsync(string exchange, RouteMessage routeMessage, ExchangeQueueOptions options = null)
+            => PublishAsync(exchange, new RouteMessage[] { routeMessage }, options);
 
         /// <summary>
         /// 发布消息
@@ -96,7 +118,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         /// <param name="exchange"></param>
         /// <param name="routeMessages"></param>
         /// <param name="options"></param>
-        public void Publish(string exchange, RouteMessage[] routeMessages, ExchangeQueueOptions options = null)
+        public async Task PublishAsync(string exchange, RouteMessage[] routeMessages, ExchangeQueueOptions options = null)
         {
             if (string.IsNullOrEmpty(exchange))
                 throw new ArgumentException("exchange cannot be empty", nameof(exchange));
@@ -105,25 +127,29 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 options = new ExchangeQueueOptions();
 
             if (options.Type == RabbitExchangeType.None)
-            {
                 throw new NotSupportedException($"{nameof(RabbitExchangeType)} must be specified");
-            }
 
-            var channel = GetChannel();
+            var channel = await GetChannelAsync();
 
-            PrepareExchangeChannel(channel, exchange, options);
+            //var nextPublishSeqNo = await channel.GetNextPublishSequenceNumberAsync();
+
+            //var tcs = new TaskCompletionSource<bool>();
+
+            //_pendingConfirms[nextPublishSeqNo] = tcs;
+
+            //channel.BasicAcksAsync += Channel_BasicAcksAsync;
+
+            //channel.BasicNacksAsync += Channel_BasicNacksAsync;
+
+            await PrepareExchangeChannelAsync(channel, exchange, options);
 
             foreach (var routeMessage in routeMessages)
             {
                 var buffer = Encoding.UTF8.GetBytes(routeMessage.Message);
 
-                IBasicProperties props = null;
+                var props = new BasicProperties();
                 if (options.BasicProps != null && options.BasicProps.Count > 0)
                 {
-                    props = channel.CreateBasicProperties();
-
-                    props.Persistent = true;
-
                     if (props.Headers == null)
                         props.Headers = new Dictionary<string, object>();
 
@@ -133,10 +159,40 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                     }
                 }
 
-                channel.BasicPublish(exchange, routeMessage.RoutingKey, props, buffer);
+                props.MessageId = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
+
+                await channel.BasicPublishAsync(exchange, routeMessage.RoutingKey, true, props, buffer);
             }
 
-            channel.Close();
+            await channel.CloseAsync();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        private async Task Channel_BasicAcksAsync(object sender, global::RabbitMQ.Client.Events.BasicAckEventArgs @event)
+        {
+            //if (_pendingConfirms.TryRemove(@event.DeliveryTag, out var tcs))
+            //    tcs.SetResult(true);
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        private async Task Channel_BasicNacksAsync(object sender, global::RabbitMQ.Client.Events.BasicNackEventArgs @event)
+        {
+            //if (_pendingConfirms.TryRemove(@event.DeliveryTag, out var tcs))
+            //    tcs.SetException(new Exception("消息被拒绝"));
+
+            await Task.CompletedTask;
         }
         #endregion
 
@@ -154,6 +210,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 UserName = rabbitBaseOptions.UserName,
                 VirtualHost = rabbitBaseOptions.VirtualHost
             };
+
             return producer;
         }
 
@@ -163,7 +220,7 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
         public override void Dispose()
         {
             base.Dispose();
-            Close();
+            CloseAsync().GetAwaiter().GetResult();
         }
     }
 }

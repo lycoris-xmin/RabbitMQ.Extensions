@@ -1,7 +1,9 @@
-﻿namespace RabbitMQSample
+﻿using System.Threading.Tasks;
+
+namespace RabbitMQSample
 {
     public interface IRabbitProducerService
     {
-        void Test();
+        Task Test();
     }
 }
