@@ -8,8 +8,9 @@
 		<RepositoryUrl>https://github.com/lycoris-xmin/RabbitMQ.Extensions</RepositoryUrl>
 		<Authors>lycoris</Authors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Version>8.0.0</Version>
+		<Version>8.1.0</Version>
 		<Description>RabbitMQ使用扩展，简化了生产者与消费者的使用，支持延迟队列</Description>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.5" />
