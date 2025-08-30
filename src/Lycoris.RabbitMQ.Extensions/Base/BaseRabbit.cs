@@ -120,11 +120,10 @@ namespace Lycoris.RabbitMQ.Extensions.Base
                 if (connection == null)
                 {
                     var array = hostAndPorts.Select(f => f.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
-                                            .Select(f => (f.FirstOrDefault(), f.Length > 1 ? int.Parse(f.ElementAt(1)) : Port))
-                                            .ToArray();
+                        .Select(f => (f.FirstOrDefault(), f.Length > 1 ? int.Parse(f.ElementAt(1)) : Port))
+                        .ToArray();
 
                     var amqpList = new List<AmqpTcpEndpoint>();
-
                     amqpList.AddRange(array.Select(f => new AmqpTcpEndpoint(f.Item1, f.Item2)));
 
                     var factory = new ConnectionFactory
