@@ -15,15 +15,13 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
     /// </summary>
     public sealed class RabbitProducer : BaseRabbit
     {
-        //private readonly ConcurrentDictionary<ulong, TaskCompletionSource<bool>> _pendingConfirms;
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="hostAndPorts"></param>
         public RabbitProducer(params string[] hostAndPorts) : base(hostAndPorts)
         {
-            //_pendingConfirms = new ConcurrentDictionary<ulong, TaskCompletionSource<bool>>();
+
         }
 
         #region 普通模式、Work模式
@@ -52,16 +50,6 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
             var channel = await GetChannelAsync();
 
-            //var nextPublishSeqNo = await channel.GetNextPublishSequenceNumberAsync();
-
-            //var tcs = new TaskCompletionSource<bool>();
-
-            //_pendingConfirms[nextPublishSeqNo] = tcs;
-
-            //channel.BasicAcksAsync += Channel_BasicAcksAsync;
-
-            //channel.BasicNacksAsync += Channel_BasicNacksAsync;
-
             await PrepareQueueChannelAsync(channel, queue, options);
 
             foreach (var message in messages)
@@ -69,13 +57,6 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
                 var buffer = Encoding.UTF8.GetBytes(message);
 
                 await channel.BasicPublishAsync("", queue, false, new BasicProperties(), buffer);
-
-                //// 这里异步等待消息确认
-                //var confirmed = tcs.Task.Wait(5000);
-                //if (!confirmed)
-                //{
-
-                //}
             }
 
             await channel.CloseAsync();
@@ -131,16 +112,6 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
 
             var channel = await GetChannelAsync();
 
-            //var nextPublishSeqNo = await channel.GetNextPublishSequenceNumberAsync();
-
-            //var tcs = new TaskCompletionSource<bool>();
-
-            //_pendingConfirms[nextPublishSeqNo] = tcs;
-
-            //channel.BasicAcksAsync += Channel_BasicAcksAsync;
-
-            //channel.BasicNacksAsync += Channel_BasicNacksAsync;
-
             await PrepareExchangeChannelAsync(channel, exchange, options);
 
             foreach (var routeMessage in routeMessages)
@@ -165,34 +136,6 @@ namespace Lycoris.RabbitMQ.Extensions.Impl
             }
 
             await channel.CloseAsync();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="event"></param>
-        /// <returns></returns>
-        private async Task Channel_BasicAcksAsync(object sender, global::RabbitMQ.Client.Events.BasicAckEventArgs @event)
-        {
-            //if (_pendingConfirms.TryRemove(@event.DeliveryTag, out var tcs))
-            //    tcs.SetResult(true);
-
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="event"></param>
-        /// <returns></returns>
-        private async Task Channel_BasicNacksAsync(object sender, global::RabbitMQ.Client.Events.BasicNackEventArgs @event)
-        {
-            //if (_pendingConfirms.TryRemove(@event.DeliveryTag, out var tcs))
-            //    tcs.SetException(new Exception("消息被拒绝"));
-
-            await Task.CompletedTask;
         }
         #endregion
 
