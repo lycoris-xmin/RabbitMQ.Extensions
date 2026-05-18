@@ -9,7 +9,7 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'RabbitMQSamples' " />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Lycoris.RabbitMQ.Extensions\Lycoris.RabbitMQ.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\Lycoris.RabbitMQ.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
